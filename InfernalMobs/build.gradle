@@ -1,7 +1,7 @@
 plugins {
     id 'eclipse'
-    id 'com.matthewprenger.cursegradle' version '1.4.0'
     id 'net.minecraftforge.gradle' version '5.1.+'
+    id 'com.matthewprenger.cursegradle' version '1.4.0'
 }
 
 def mcversion = '1.19.2'
@@ -14,7 +14,7 @@ java.toolchain.languageVersion = JavaLanguageVersion.of(17)
 
 minecraft {
     mappings channel: 'official', version: '1.19.2'
-    
+
     runs {
         client {
             workingDirectory project.file('run')
@@ -51,34 +51,22 @@ minecraft {
 }
 
 dependencies {
-    minecraft 'net.minecraftforge:forge:1.19.2-43.0.8'
+    minecraft 'net.minecraftforge:forge:1.19.2-43.1.1'
 }
 
 // Example for how to get properties into the manifest for reading by the runtime..
 jar {
     manifest {
         attributes([
-            "Specification-Title": "infernalmobs",
-            "Specification-Vendor": "atomicstryker",
-            "Specification-Version": "${version}",
-            "Implementation-Title": project.name,
-            "Implementation-Version": "${version}",
-            "Implementation-Vendor" :"atomicstryker",
-            "Implementation-Timestamp": new Date().format("yyyy-MM-dd'T'HH:mm:ssZ")
+                "Specification-Title": "infernalmobs",
+                "Specification-Vendor": "atomicstryker",
+                "Specification-Version": "${version}",
+                "Implementation-Title": project.name,
+                "Implementation-Version": "${version}",
+                "Implementation-Vendor" :"atomicstryker",
+                "Implementation-Timestamp": new Date().format("yyyy-MM-dd'T'HH:mm:ssZ")
         ])
     }
 }
 
 jar.finalizedBy('reobfJar')
-
-curseforge {
-    apiKey = project.curseForgeApiKey
-    project {
-        id = '227875'
-        releaseType = 'release'
-        addGameVersion mcversion
-        mainArtifact(file('build/libs/infernalmobs-' + version + '.jar')) {
-          displayName = 'AtomicStryker\'s Infernal Mobs'
-        }
-    }
-}

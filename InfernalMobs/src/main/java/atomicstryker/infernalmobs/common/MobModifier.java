@@ -243,13 +243,21 @@ public abstract class MobModifier {
             }
 
             if (attackTarget != null) {
-                if (!attackTarget.isAlive() || attackTarget.distanceTo(mob) > 15f) {
-                    attackTarget = null;
+                if (shouldDropTarget(mob)) {
+                    onDropTarget();
                 }
             }
         }
 
         return false;
+    }
+
+    public boolean shouldDropTarget(LivingEntity mob){
+        return !attackTarget.isAlive() || attackTarget.distanceTo(mob) > 15f;
+    }
+
+    public void onDropTarget(){
+        attackTarget = null;
     }
 
     /**
