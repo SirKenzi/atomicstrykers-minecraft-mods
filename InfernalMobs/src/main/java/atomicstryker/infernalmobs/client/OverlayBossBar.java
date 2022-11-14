@@ -1,9 +1,10 @@
 package atomicstryker.infernalmobs.client;
 
 import atomicstryker.infernalmobs.common.InfernalMobsCore;
-import atomicstryker.infernalmobs.common.MobModifier;
+import atomicstryker.infernalmobs.common.mod.MobModifier;
 import atomicstryker.infernalmobs.common.network.HealthPacket;
 import atomicstryker.infernalmobs.common.network.MobModsPacket;
+import atomicstryker.infernalmobs.config.ConfigStore;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.Minecraft;
@@ -61,7 +62,7 @@ public class OverlayBossBar {
     public static class InfernalMobsHealthBarGuiOverlay implements IGuiOverlay {
         @Override
         public void render(ForgeGui gui, PoseStack poseStack, float partialTick, int width, int height) {
-            if (InfernalMobsCore.instance().getIsHealthBarDisabled() || mc.gui.getBossOverlay().shouldPlayMusic()) {
+            if (ConfigStore.getConfig().isDisableHealthBar() || mc.gui.getBossOverlay().shouldPlayMusic()) {
                 return;
             }
 

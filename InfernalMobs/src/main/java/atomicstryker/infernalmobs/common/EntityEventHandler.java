@@ -1,5 +1,8 @@
 package atomicstryker.infernalmobs.common;
 
+import atomicstryker.infernalmobs.common.mod.MobModifier;
+import atomicstryker.infernalmobs.config.ConfigStore;
+import atomicstryker.infernalmobs.config.GsonConfig;
 import net.minecraft.util.Tuple;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
@@ -91,7 +94,7 @@ public class EntityEventHandler {
                 }
             }
 
-            if (InfernalMobsCore.instance().config.isAntiMobFarm()) {
+            if (ConfigStore.getConfig().isAntiMobFarm()) {
                 /*
                  * check for an environmental/automated damage type, aka mob
                  * farms
@@ -111,7 +114,7 @@ public class EntityEventHandler {
                         }
                     } else {
                         damageMap.put(cpair, value + event.getAmount());
-                        GsonConfig.saveConfig(InfernalMobsCore.instance().config, InfernalMobsCore.instance().configFile);
+                        ConfigStore.saveConfig();
                     }
                 }
             }
@@ -155,7 +158,7 @@ public class EntityEventHandler {
                 mod.onUpdate(event.getEntity());
             }
 
-            if (InfernalMobsCore.instance().config.isAntiMobFarm() && System.currentTimeMillis() > nextMapEvaluation) {
+            if (ConfigStore.getConfig().isAntiMobFarm() && System.currentTimeMillis() > nextMapEvaluation) {
                 if (!damageMap.isEmpty()) {
                     float maxDamage = 0f;
                     float val;
@@ -170,14 +173,14 @@ public class EntityEventHandler {
 
                     if (maxC != null) {
                         System.out.println("Infernal Mobs AntiMobFarm damage check, max detected chunk damage value " + maxDamage + " near coords " + maxC.getA() + ", " + maxC.getB());
-                        if (maxDamage > InfernalMobsCore.instance().config.getMobFarmDamageTrigger()) {
+                        if (maxDamage > ConfigStore.getConfig().getMobFarmDamageTrigger()) {
                             MinecraftForge.EVENT_BUS
-                                    .post(new MobFarmDetectedEvent(event.getEntity().level.getChunk(maxC.getA(), maxC.getB()), InfernalMobsCore.instance().config.getMobFarmCheckIntervals(), maxDamage));
+                                    .post(new MobFarmDetectedEvent(event.getEntity().level.getChunk(maxC.getA(), maxC.getB()), ConfigStore.getConfig().getMobFarmCheckIntervals(), maxDamage));
                         }
                     }
                     damageMap.clear();
                 }
-                nextMapEvaluation = System.currentTimeMillis() + InfernalMobsCore.instance().config.getMobFarmCheckIntervals();
+                nextMapEvaluation = System.currentTimeMillis() + ConfigStore.getConfig().getMobFarmCheckIntervals();
             }
         }
     }

@@ -1,12 +1,11 @@
 package atomicstryker.infernalmobs.common;
 
-import atomicstryker.infernalmobs.client.InfernalMobsClient;
-import atomicstryker.infernalmobs.common.mods.*;
+import atomicstryker.infernalmobs.command.InfernalCommandFindEntityClass;
+import atomicstryker.infernalmobs.command.InfernalCommandSpawnInfernal;
+import atomicstryker.infernalmobs.common.mod.MobModifier;
+import atomicstryker.infernalmobs.config.*;
 import atomicstryker.infernalmobs.common.network.*;
-import com.google.common.collect.Lists;
-import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.MinecraftServer;
+import atomicstryker.infernalmobs.util.Helper;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.Entity;
@@ -20,7 +19,6 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.EnchantedBookItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.item.enchantment.EnchantmentInstance;
@@ -34,11 +32,9 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.network.PacketDistributor;
 import net.minecraftforge.registries.ForgeRegistries;
-import net.minecraftforge.server.ServerLifecycleHooks;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.io.File;
 import java.util.*;
 
 @Mod(InfernalMobsCore.MOD_ID)
@@ -51,18 +47,9 @@ public class InfernalMobsCore {
     private static InfernalMobsCore instance;
     private final long existCheckDelay = 5000L;
     public NetworkHelper networkHelper;
-    protected File configFile;
-    protected InfernalMobsConfig config;
     private long nextExistCheckTime;
-    private ItemConfigHelper lootItemDropsElite;
-    private ItemConfigHelper lootItemDropsUltra;
-    private ItemConfigHelper lootItemDropsInfernal;
-    private HashMap<String, Boolean> classesAllowedMap;
-    private HashMap<String, Boolean> classesForcedMap;
-    private HashMap<String, Double> classesHealthMap;
     private Entity infCheckA;
     private Entity infCheckB;
-    private ArrayList<Class<? extends MobModifier>> mobMods = null;
     private ArrayList<Enchantment> enchantmentList;
     /*
      * saves the last timestamp of long term affected players (eg choke) reset
@@ -74,13 +61,9 @@ public class InfernalMobsCore {
         instance = this;
 
         nextExistCheckTime = System.currentTimeMillis();
-        classesAllowedMap = new HashMap<>();
-        classesForcedMap = new HashMap<>();
-        classesHealthMap = new HashMap<>();
         modifiedPlayerTimes = new HashMap<>();
 
         MinecraftForge.EVENT_BUS.register(this);
-
         MinecraftForge.EVENT_BUS.register(new EntityEventHandler());
         MinecraftForge.EVENT_BUS.register(new SaveEventHandler());
 
@@ -97,11 +80,11 @@ public class InfernalMobsCore {
         return SidedCache.getInfernalMobs(ent.level).get(ent);
     }
 
-    public static boolean getIsRareEntityOnline(LivingEntity ent) {
+    public static boolean isRareEntityOnline(LivingEntity ent) {
         return SidedCache.getInfernalMobs(ent.level).containsKey(ent);
     }
 
-    public static boolean getWasMobSpawnedBefore(LivingEntity ent) {
+    public static boolean wasMobSpawnedBefore(LivingEntity ent) {
         // check if the entity previously passed infernal mob generation without getting a mod
         String storedInfernalTag = ent.getPersistentData().getString(instance().getNBTTag());
         boolean result = !storedInfernalTag.isEmpty() && instance().getNBTMarkerForNonInfernalEntities().equals(storedInfernalTag);
@@ -146,22 +129,8 @@ public class InfernalMobsCore {
      * is triggered either by server start or by client login event from InfernalMobsClient
      */
     public void initIfNeeded(Level world) {
-        if (mobMods == null) {
-            prepareModList();
-
-            File mcFolder;
-            if (world.isClientSide()) {
-                mcFolder = InfernalMobsClient.getMcFolder();
-            } else {
-                MinecraftServer server = ServerLifecycleHooks.getCurrentServer();
-                mcFolder = server.getFile("");
-            }
-
-            configFile = new File(mcFolder, File.separatorChar + "config" + File.separatorChar + "infernalmobs.cfg");
-            loadConfig();
-
-            LOGGER.info("InfernalMobsCore commonSetup completed! Modifiers ready: " + mobMods.size());
-            LOGGER.info("InfernalMobsCore commonSetup completed! config file at: " + configFile.getAbsolutePath());
+        if(Objects.isNull(ConfigStore.getConfig())){
+            ConfigStore.load(world);
         }
     }
 
@@ -172,240 +141,45 @@ public class InfernalMobsCore {
     }
 
     /**
-     * Registers the MobModifier classes for consideration
-     */
-    private void prepareModList() {
-        mobMods = new ArrayList<>();
-
-        mobMods.add(MM_1UP.class);
-        mobMods.add(MM_Alchemist.class);
-        mobMods.add(MM_Berserk.class);
-        mobMods.add(MM_Blastoff.class);
-        mobMods.add(MM_Bulwark.class);
-        mobMods.add(MM_Choke.class);
-        mobMods.add(MM_Cloaking.class);
-        mobMods.add(MM_Darkness.class);
-        mobMods.add(MM_Ender.class);
-        mobMods.add(MM_Exhaust.class);
-        mobMods.add(MM_Fiery.class);
-        mobMods.add(MM_Ghastly.class);
-        mobMods.add(MM_Gravity.class);
-        mobMods.add(MM_Lifesteal.class);
-        mobMods.add(MM_Ninja.class);
-        mobMods.add(MM_Poisonous.class);
-        mobMods.add(MM_Quicksand.class);
-        mobMods.add(MM_Regen.class);
-        mobMods.add(MM_Rust.class);
-        mobMods.add(MM_Sapper.class);
-        mobMods.add(MM_Sprint.class);
-        mobMods.add(MM_Sticky.class);
-        mobMods.add(MM_Storm.class);
-        mobMods.add(MM_Vengeance.class);
-        mobMods.add(MM_Weakness.class);
-        mobMods.add(MM_Webber.class);
-        mobMods.add(MM_Wither.class);
-    }
-
-    /**
-     * Forge Config file
-     */
-    private void loadConfig() {
-        InfernalMobsConfig defaultConfig = new InfernalMobsConfig();
-        defaultConfig.setEliteRarity(15);
-        defaultConfig.setUltraRarity(7);
-        defaultConfig.setInfernoRarity(7);
-        defaultConfig.setUseSimpleEntityClassNames(true);
-        defaultConfig.setDisableHealthBar(false);
-        defaultConfig.setModHealthFactor(1.0D);
-
-        List<String> dropsElite = new ArrayList<>();
-        dropsElite.add(ItemConfigHelper.fromItemStack(new ItemStack(Items.IRON_SHOVEL)));
-        dropsElite.add(ItemConfigHelper.fromItemStack(new ItemStack(Items.IRON_PICKAXE)));
-        dropsElite.add(ItemConfigHelper.fromItemStack(new ItemStack(Items.IRON_AXE)));
-        dropsElite.add(ItemConfigHelper.fromItemStack(new ItemStack(Items.IRON_SWORD)));
-        dropsElite.add(ItemConfigHelper.fromItemStack(new ItemStack(Items.IRON_HOE)));
-        dropsElite.add(ItemConfigHelper.fromItemStack(new ItemStack(Items.CHAINMAIL_HELMET)));
-        dropsElite.add(ItemConfigHelper.fromItemStack(new ItemStack(Items.CHAINMAIL_BOOTS)));
-        dropsElite.add(ItemConfigHelper.fromItemStack(new ItemStack(Items.CHAINMAIL_CHESTPLATE)));
-        dropsElite.add(ItemConfigHelper.fromItemStack(new ItemStack(Items.CHAINMAIL_LEGGINGS)));
-        dropsElite.add(ItemConfigHelper.fromItemStack(new ItemStack(Items.IRON_HELMET)));
-        dropsElite.add(ItemConfigHelper.fromItemStack(new ItemStack(Items.IRON_BOOTS)));
-        dropsElite.add(ItemConfigHelper.fromItemStack(new ItemStack(Items.IRON_CHESTPLATE)));
-        dropsElite.add(ItemConfigHelper.fromItemStack(new ItemStack(Items.IRON_LEGGINGS)));
-        dropsElite.add(ItemConfigHelper.fromItemStack(new ItemStack(Items.COOKIE, 5)));
-        defaultConfig.setDroppedItemIDsElite(dropsElite);
-
-        List<String> dropsUltra = new ArrayList<>();
-        dropsUltra.add(ItemConfigHelper.fromItemStack(new ItemStack(Items.IRON_HOE)));
-        dropsUltra.add(ItemConfigHelper.fromItemStack(new ItemStack(Items.BOW)));
-        dropsUltra.add(ItemConfigHelper.fromItemStack(new ItemStack(Items.CHAINMAIL_HELMET)));
-        dropsUltra.add(ItemConfigHelper.fromItemStack(new ItemStack(Items.CHAINMAIL_BOOTS)));
-        dropsUltra.add(ItemConfigHelper.fromItemStack(new ItemStack(Items.CHAINMAIL_CHESTPLATE)));
-        dropsUltra.add(ItemConfigHelper.fromItemStack(new ItemStack(Items.CHAINMAIL_LEGGINGS)));
-        dropsUltra.add(ItemConfigHelper.fromItemStack(new ItemStack(Items.IRON_HELMET)));
-        dropsUltra.add(ItemConfigHelper.fromItemStack(new ItemStack(Items.IRON_BOOTS)));
-        dropsUltra.add(ItemConfigHelper.fromItemStack(new ItemStack(Items.IRON_CHESTPLATE)));
-        dropsUltra.add(ItemConfigHelper.fromItemStack(new ItemStack(Items.IRON_LEGGINGS)));
-        dropsUltra.add(ItemConfigHelper.fromItemStack(new ItemStack(Items.GOLDEN_HELMET)));
-        dropsUltra.add(ItemConfigHelper.fromItemStack(new ItemStack(Items.GOLDEN_BOOTS)));
-        dropsUltra.add(ItemConfigHelper.fromItemStack(new ItemStack(Items.GOLDEN_CHESTPLATE)));
-        dropsUltra.add(ItemConfigHelper.fromItemStack(new ItemStack(Items.GOLDEN_LEGGINGS)));
-        dropsUltra.add(ItemConfigHelper.fromItemStack(new ItemStack(Items.GOLDEN_APPLE, 3)));
-        dropsUltra.add(ItemConfigHelper.fromItemStack(new ItemStack(Items.BLAZE_POWDER, 5)));
-        dropsUltra.add(ItemConfigHelper.fromItemStack(new ItemStack(Items.ENCHANTED_BOOK)));
-        defaultConfig.setDroppedItemIDsUltra(dropsUltra);
-
-        List<String> dropsInfernal = new ArrayList<>();
-        dropsInfernal.add(ItemConfigHelper.fromItemStack(new ItemStack(Items.ENCHANTED_BOOK)));
-        dropsInfernal.add(ItemConfigHelper.fromItemStack(new ItemStack(Items.DIAMOND, 3)));
-        dropsInfernal.add(ItemConfigHelper.fromItemStack(new ItemStack(Items.DIAMOND_SWORD)));
-        dropsInfernal.add(ItemConfigHelper.fromItemStack(new ItemStack(Items.DIAMOND_AXE)));
-        dropsInfernal.add(ItemConfigHelper.fromItemStack(new ItemStack(Items.DIAMOND_HOE)));
-        dropsInfernal.add(ItemConfigHelper.fromItemStack(new ItemStack(Items.DIAMOND_PICKAXE)));
-        dropsInfernal.add(ItemConfigHelper.fromItemStack(new ItemStack(Items.DIAMOND_SHOVEL)));
-        dropsInfernal.add(ItemConfigHelper.fromItemStack(new ItemStack(Items.CHAINMAIL_HELMET)));
-        dropsInfernal.add(ItemConfigHelper.fromItemStack(new ItemStack(Items.CHAINMAIL_BOOTS)));
-        dropsInfernal.add(ItemConfigHelper.fromItemStack(new ItemStack(Items.CHAINMAIL_CHESTPLATE)));
-        dropsInfernal.add(ItemConfigHelper.fromItemStack(new ItemStack(Items.CHAINMAIL_LEGGINGS)));
-        dropsInfernal.add(ItemConfigHelper.fromItemStack(new ItemStack(Items.DIAMOND_HELMET)));
-        dropsInfernal.add(ItemConfigHelper.fromItemStack(new ItemStack(Items.DIAMOND_BOOTS)));
-        dropsInfernal.add(ItemConfigHelper.fromItemStack(new ItemStack(Items.DIAMOND_CHESTPLATE)));
-        dropsInfernal.add(ItemConfigHelper.fromItemStack(new ItemStack(Items.DIAMOND_LEGGINGS)));
-        dropsInfernal.add(ItemConfigHelper.fromItemStack(new ItemStack(Items.ENDER_PEARL, 3)));
-        defaultConfig.setDroppedItemIDsInfernal(dropsInfernal);
-
-        defaultConfig.setMaxDamage(10D);
-        defaultConfig.setDimensionIDBlackList(new ArrayList<>());
-
-        Map<String, Boolean> modsEnabledMap = new HashMap<>();
-        for (Class<?> c : mobMods) {
-            modsEnabledMap.put(c.getSimpleName(), true);
-        }
-        defaultConfig.setModsEnabled(modsEnabledMap);
-
-        config = GsonConfig.loadConfigWithDefault(InfernalMobsConfig.class, configFile, defaultConfig);
-
-        lootItemDropsElite = new ItemConfigHelper(config.getDroppedItemIDsElite(), LOGGER);
-        lootItemDropsUltra = new ItemConfigHelper(config.getDroppedItemIDsUltra(), LOGGER);
-        lootItemDropsInfernal = new ItemConfigHelper(config.getDroppedItemIDsInfernal(), LOGGER);
-
-        mobMods.removeIf(c -> !config.getModsEnabled().containsKey(c.getSimpleName()) || !config.getModsEnabled().get(c.getSimpleName()));
-    }
-
-    /**
      * Called when an Entity is spawned by natural (Biome Spawning) means, turn
      * them into Elites here
      *
      * @param entity Entity in question
      */
     public void processEntitySpawn(LivingEntity entity) {
-        if (!entity.level.isClientSide && config != null) {
-            if (!getIsRareEntityOnline(entity) && !getWasMobSpawnedBefore(entity)) {
-                if (isClassAllowed(entity) && (instance.checkEntityClassForced(entity) || entity.level.random.nextInt(config.getEliteRarity()) == 0)) {
-                    try {
-                        /*
-                            get server world from resource location:
-                            RegistryKey<World> registrykey = RegistryKey.create(Registry.WORLD_KEY, resourcelocation);
-                            ServerWorld serverworld = p_212592_0_.getSource().getServer().getWorld(registrykey);
-                         */
-                        ResourceKey<Level> worldRegistryKey = entity.getCommandSenderWorld().dimension();
-                        ResourceLocation worldResourceLocation = worldRegistryKey.location();
+        if( entity.level.isClientSide || Objects.isNull(ConfigStore.getConfig())
+                || Helper.isDimensionBlacklisted(entity)
+                || isRareEntityOnline(entity)
+                || wasMobSpawnedBefore(entity)
+        ){
+            return;
+        }
 
-                        // Skip Infernal-Spawn when Dimension is Blacklisted, entries look like: "minecraft:overworld"
-                        if (!config.getDimensionIDBlackList().contains(worldResourceLocation.toString())) {
-                            MobModifier mod = instance.createMobModifiers(entity);
-                            if (mod != null) {
-                                SidedCache.getInfernalMobs(entity.level).put(entity, mod);
-                                mod.onSpawningCompleteStoreModsAndBuffHealth(entity);
-                                // System.out.println("InfernalMobsCore modded
-                                // mob: "+entity+", id "+entity.getEntityId()+":
-                                // "+mod.getLinkedModName());
-                            }
-                        }
-                    } catch (Exception e) {
-                        LOGGER.log(org.apache.logging.log4j.Level.ERROR, "processEntitySpawn() threw an exception");
-                        e.printStackTrace();
-                    }
-                } else {
-                    setMobWasSpawnedBefore(entity);
+        if (this.canEnemyTypeBecomeInfernal(entity) && (ConfigStore.isForcedToBecomeInfernal(entity) || entity.level.random.nextInt(ConfigStore.getConfig().getEliteRarity()) == 0)) {
+            try {
+                MobModifier mod = instance.createMobModifiers(entity);
+                if (mod != null) {
+                    SidedCache.getInfernalMobs(entity.level).put(entity, mod);
+                    mod.onSpawningCompleteStoreModsAndBuffHealth(entity);
                 }
+
+            } catch (Exception e) {
+                LOGGER.log(org.apache.logging.log4j.Level.ERROR, "processEntitySpawn() threw an exception");
+                e.printStackTrace();
             }
+        } else {
+            setMobWasSpawnedBefore(entity);
         }
     }
 
-    private boolean isClassAllowed(LivingEntity entity) {
-        if ((entity instanceof Enemy)) {
+    private boolean canEnemyTypeBecomeInfernal(LivingEntity entity) {
+        if (entity instanceof Enemy) {
             if (entity instanceof TamableAnimal) {
                 return false;
             }
-            if (instance.checkEntityClassAllowed(entity)) {
-                return true;
-            }
+            return ConfigStore.isEntityClassAllowedToBecomeInfernal(entity);
         }
         return false;
-    }
-
-    private String getEntityNameSafe(Entity entity) {
-        String result;
-        try {
-            result = ForgeRegistries.ENTITY_TYPES.getKey(entity.getType()).getPath();
-        } catch (Exception e) {
-            result = entity.getClass().getSimpleName();
-            System.err.println("Entity of class " + result + " crashed when EntityList.getEntityString was queried, for shame! Using classname instead.");
-            System.err.println("If this message is spamming too much for your taste set useSimpleEntityClassnames true in your Infernal Mobs config");
-        }
-        return result;
-    }
-
-    private boolean checkEntityClassAllowed(LivingEntity entity) {
-        String entName = config.isUseSimpleEntityClassNames() ? entity.getClass().getSimpleName() : getEntityNameSafe(entity);
-        if (classesAllowedMap.containsKey(entName)) {
-            return classesAllowedMap.get(entName);
-        }
-
-        boolean result = true;
-        if (!config.getPermittedentities().containsKey(entName)) {
-            config.getPermittedentities().put(entName, true);
-            GsonConfig.saveConfig(config, configFile);
-        } else {
-            result = config.getPermittedentities().get(entName);
-            classesAllowedMap.put(entName, result);
-        }
-        return result;
-    }
-
-    private boolean checkEntityClassForced(LivingEntity entity) {
-        String entName = config.isUseSimpleEntityClassNames() ? entity.getClass().getSimpleName() : getEntityNameSafe(entity);
-        if (classesForcedMap.containsKey(entName)) {
-            return classesForcedMap.get(entName);
-        }
-
-        boolean result = false;
-        if (!config.getEntitiesalwaysinfernal().containsKey(entName)) {
-            config.getEntitiesalwaysinfernal().put(entName, false);
-            GsonConfig.saveConfig(config, configFile);
-        } else {
-            result = config.getEntitiesalwaysinfernal().get(entName);
-            classesForcedMap.put(entName, result);
-        }
-        return result;
-    }
-
-    public double getMobClassMaxHealth(LivingEntity entity) {
-        String entName = config.isUseSimpleEntityClassNames() ? entity.getClass().getSimpleName() : getEntityNameSafe(entity);
-        if (classesHealthMap.containsKey(entName)) {
-            return classesHealthMap.get(entName);
-        }
-
-        double result = entity.getMaxHealth();
-        if (!config.getEntitybasehealth().containsKey(entName)) {
-            config.getEntitybasehealth().put(entName, (double) entity.getMaxHealth());
-            GsonConfig.saveConfig(config, configFile);
-        } else {
-            result = config.getEntitybasehealth().get(entName);
-            classesHealthMap.put(entName, result);
-        }
-        return result;
     }
 
     /**
@@ -431,13 +205,13 @@ public class InfernalMobsCore {
         /* 2-5 modifications standard */
         int number = 2 + entity.level.random.nextInt(3);
         /* lets just be lazy and scratch mods off a list copy */
-        ArrayList<Class<? extends MobModifier>> possibleMods = Lists.newArrayList(mobMods);
+        List<Class<? extends MobModifier>> possibleMods = new ArrayList<>(Helper.getMobModifierClasses());
 
-        if (entity.level.random.nextInt(config.getUltraRarity()) == 0) // ultra mobs
+        if (entity.level.random.nextInt(ConfigStore.getConfig().getUltraRarity()) == 0) // ultra mobs
         {
             number += 3 + entity.level.random.nextInt(2);
 
-            if (entity.level.random.nextInt(config.getInfernoRarity()) == 0) // infernal
+            if (entity.level.random.nextInt(ConfigStore.getConfig().getInfernoRarity()) == 0) // infernal
             // mobs
             {
                 number += 3 + entity.level.random.nextInt(2);
@@ -507,7 +281,7 @@ public class InfernalMobsCore {
      * @param savedMods String depicting the MobModifiers, equal to the ingame Display
      */
     public void addEntityModifiersByString(LivingEntity entity, String savedMods) {
-        if (!getIsRareEntityOnline(entity)) {
+        if (!isRareEntityOnline(entity)) {
             // this can fire before the localhost client has logged in, loading a world save, need to init the mod!
             initIfNeeded(entity.level);
             MobModifier mod = stringToMobModifiers(savedMods);
@@ -529,7 +303,7 @@ public class InfernalMobsCore {
             String modName = tokens[j];
 
             MobModifier nextMod = null;
-            for (Class<? extends MobModifier> c : mobMods) {
+            for (Class<? extends MobModifier> c : Helper.getMobModifierClasses()) {
                 /*
                  * instanciate using one of the two constructors, chainlinking
                  * modifiers as we go
@@ -659,7 +433,7 @@ public class InfernalMobsCore {
      * @return ItemStack instance to drop to the World
      */
     private ItemStack getRandomItem(LivingEntity mob, int prefix) {
-        List<ItemStack> list = (prefix == 0) ? instance.lootItemDropsElite.getItemStackList() : (prefix == 1) ? instance.lootItemDropsUltra.getItemStackList() : instance.lootItemDropsInfernal.getItemStackList();
+        List<ItemStack> list = ConfigStore.getLootList(prefix);
         return list.size() > 0 ? list.get(mob.level.random.nextInt(list.size())).copy() : null;
     }
 
@@ -719,7 +493,7 @@ public class InfernalMobsCore {
                 String username = entry.getKey();
                 for (Player player : world.players()) {
                     if (player.getName().getString().equals(username)) {
-                        for (Class<? extends MobModifier> c : mobMods) {
+                        for (Class<? extends MobModifier> c : Helper.getMobModifierClasses()) {
                             try {
                                 MobModifier mod = c.getConstructor(new Class[]{}).newInstance();
                                 mod.resetModifiedVictim(player);
@@ -734,16 +508,8 @@ public class InfernalMobsCore {
         }
     }
 
-    public boolean getIsHealthBarDisabled() {
-        return config.isDisableHealthBar();
-    }
-
-    public double getMobModHealthFactor() {
-        return config.getModHealthFactor();
-    }
-
     public float getLimitedDamage(float test) {
-        return (float) Math.min(test, config.getMaxDamage());
+        return (float) Math.min(test, ConfigStore.getConfig().getMaxDamage());
     }
 
     public boolean getIsEntityAllowedTarget(Entity entity) {

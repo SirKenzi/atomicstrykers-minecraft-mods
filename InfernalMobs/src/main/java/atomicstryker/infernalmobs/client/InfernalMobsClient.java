@@ -1,9 +1,9 @@
 package atomicstryker.infernalmobs.client;
 
 import atomicstryker.infernalmobs.common.InfernalMobsCore;
-import atomicstryker.infernalmobs.common.MobModifier;
+import atomicstryker.infernalmobs.common.mod.MobModifier;
 import atomicstryker.infernalmobs.common.SidedCache;
-import atomicstryker.infernalmobs.common.mods.MM_Gravity;
+import atomicstryker.infernalmobs.common.mod.specific.MM_Gravity;
 import atomicstryker.infernalmobs.common.network.MobModsPacket;
 import net.minecraft.client.Minecraft;
 import net.minecraft.world.entity.Entity;
@@ -70,10 +70,6 @@ public class InfernalMobsClient {
 
     public static void onVelocityPacket(float xv, float yv, float zv) {
         mc.submitAsync(() -> mc.player.push(xv, yv, zv));
-    }
-
-    public static File getMcFolder() {
-        return Minecraft.getInstance().gameDirectory;
     }
 
 }

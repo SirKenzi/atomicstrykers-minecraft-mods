@@ -1,5 +1,6 @@
 package atomicstryker.infernalmobs.common;
 
+import atomicstryker.infernalmobs.common.mod.MobModifier;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.Level;
 
