@@ -1,7 +1,8 @@
 package atomicstryker.infernalmobs.common.mod.specific;
 
+import atomicstryker.infernalmobs.common.mod.InfernalMonster;
 import atomicstryker.infernalmobs.common.mod.MobModifier;
-import atomicstryker.infernalmobs.common.mod.MobModifierType;
+import atomicstryker.infernalmobs.common.mod.ModifierDefinition;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
@@ -14,19 +15,14 @@ import net.minecraft.util.Mth;
 public class MM_Webber extends MobModifier {
 
     private final static long coolDown = 15000L;
-    private static Class<?>[] modBans = {MM_Gravity.class, MM_Blastoff.class};
     private long lastAbilityUse = 0L;
 
-    public MM_Webber() {
-        super();
+    public MM_Webber(InfernalMonster infernalMonster) {
+        super(infernalMonster);
     }
 
-    public MM_Webber(MobModifier next) {
-        super(next);
-    }
-
-    protected MobModifierType getMonsterModifierType() {
-        return MobModifierType.WEBBER;
+    public ModifierDefinition getModifierDefinition() {
+        return ModifierDefinition.WEBBER;
     }
 
     @Override
@@ -73,11 +69,6 @@ public class MM_Webber extends MobModifier {
             target.level.setBlockAndUpdate(new BlockPos(x, y + offset, z), Blocks.COBWEB.defaultBlockState());
             mob.level.playSound(null, mob.blockPosition(), SoundEvents.SPIDER_AMBIENT, SoundSource.HOSTILE, 1.0F + mob.getRandom().nextFloat(), mob.getRandom().nextFloat() * 0.7F + 0.3F);
         }
-    }
-
-    @Override
-    public Class<?>[] getModsNotToMixWith() {
-        return modBans;
     }
 
 }

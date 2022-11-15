@@ -1,7 +1,8 @@
 package atomicstryker.infernalmobs.common.mod.specific;
 
+import atomicstryker.infernalmobs.common.mod.InfernalMonster;
 import atomicstryker.infernalmobs.common.mod.MobModifier;
-import atomicstryker.infernalmobs.common.mod.MobModifierType;
+import atomicstryker.infernalmobs.common.mod.ModifierDefinition;
 import net.minecraft.world.entity.LivingEntity;
 
 public class MM_Sprint extends MobModifier {
@@ -12,16 +13,12 @@ public class MM_Sprint extends MobModifier {
     private double modMotionX;
     private double modMotionZ;
 
-    public MM_Sprint() {
-        super();
+    public MM_Sprint(InfernalMonster infernalMonster) {
+        super(infernalMonster);
     }
 
-    public MM_Sprint(MobModifier next) {
-        super(next);
-    }
-
-    protected MobModifierType getMonsterModifierType() {
-        return MobModifierType.SPRINT;
+    public ModifierDefinition getModifierDefinition() {
+        return ModifierDefinition.SPRINT;
     }
 
     @Override

@@ -1,7 +1,8 @@
 package atomicstryker.infernalmobs.common.mod.specific;
 
+import atomicstryker.infernalmobs.common.mod.InfernalMonster;
 import atomicstryker.infernalmobs.common.mod.MobModifier;
-import atomicstryker.infernalmobs.common.mod.MobModifierType;
+import atomicstryker.infernalmobs.common.mod.ModifierDefinition;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.Mth;
 import net.minecraft.world.effect.MobEffects;
@@ -19,16 +20,12 @@ public class MM_Alchemist extends MobModifier {
     private final static float MIN_DISTANCE = 2F;
     private long nextAbilityUse = 0L;
 
-    public MM_Alchemist() {
-        super();
+    public MM_Alchemist(InfernalMonster infernalMonster) {
+        super(infernalMonster);
     }
 
-    public MM_Alchemist(MobModifier next) {
-        super(next);
-    }
-
-    protected MobModifierType getMonsterModifierType() {
-        return MobModifierType.ALCHEMIST;
+    public ModifierDefinition getModifierDefinition() {
+        return ModifierDefinition.ALCHEMIST;
     }
 
     @Override
@@ -40,7 +37,7 @@ public class MM_Alchemist extends MobModifier {
                 tryAbility(mob, mob.level.getNearestPlayer(mob, 12f));
             }
         }
-        return super.onUpdate(mob);
+        return true;
     }
 
     private void tryAbility(LivingEntity mob, LivingEntity target) {

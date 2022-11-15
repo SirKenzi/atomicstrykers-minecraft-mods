@@ -1,9 +1,8 @@
 package atomicstryker.infernalmobs.util;
 
 import atomicstryker.infernalmobs.common.mod.MobModifier;
-import atomicstryker.infernalmobs.common.mod.MobModifierType;
+import atomicstryker.infernalmobs.common.mod.ModifierDefinition;
 import atomicstryker.infernalmobs.config.ConfigStore;
-import atomicstryker.infernalmobs.config.InfernalMobsConfig;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
@@ -15,17 +14,15 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static atomicstryker.infernalmobs.common.mod.MobModifierType.values;
-
 public class Helper {
 
-    private static List<MobModifierType> mobModifierTypes;
+    private static List<ModifierDefinition> modifierDefinitions;
     private static List<Class<? extends MobModifier>> mobModifierClasses;
 
     static {
-        mobModifierTypes = Arrays.stream(values()).collect(Collectors.toList());
-        mobModifierClasses = mobModifierTypes.stream()
-                .map(MobModifierType::getModifierTypeClass)
+        modifierDefinitions = Arrays.stream(ModifierDefinition.values()).collect(Collectors.toList());
+        mobModifierClasses = modifierDefinitions.stream()
+                .map(ModifierDefinition::getModifierImplementation)
                 .collect(Collectors.toList());
     }
     public static boolean isDimensionBlacklisted(LivingEntity entity) {
@@ -43,7 +40,9 @@ public class Helper {
         return mobModifierClasses;
     }
 
-
+    public static List<ModifierDefinition> getModifierDefinitions() {
+        return modifierDefinitions;
+    }
 
     private static String getEntityNameSafe(Entity entity) {
         String result;

@@ -1,8 +1,9 @@
 package atomicstryker.infernalmobs.common.mod.specific;
 
-import atomicstryker.infernalmobs.common.InfernalMobsCore;
+import atomicstryker.infernalmobs.InfernalMobsCore;
+import atomicstryker.infernalmobs.common.mod.InfernalMonster;
 import atomicstryker.infernalmobs.common.mod.MobModifier;
-import atomicstryker.infernalmobs.common.mod.MobModifierType;
+import atomicstryker.infernalmobs.common.mod.ModifierDefinition;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.LivingEntity;
@@ -10,16 +11,12 @@ import net.minecraft.world.entity.LivingEntity;
 public class MM_Quicksand extends MobModifier {
     int ticker = 0;
 
-    public MM_Quicksand() {
-        super();
+    public MM_Quicksand(InfernalMonster infernalMonster) {
+        super(infernalMonster);
     }
 
-    public MM_Quicksand(MobModifier next) {
-        super(next);
-    }
-
-    protected MobModifierType getMonsterModifierType() {
-        return MobModifierType.QUICKSAND;
+    public ModifierDefinition getModifierDefinition() {
+        return ModifierDefinition.QUICKSAND;
     }
 
     @Override

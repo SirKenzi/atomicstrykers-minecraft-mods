@@ -1,8 +1,9 @@
 package atomicstryker.infernalmobs.common.mod.specific;
 
-import atomicstryker.infernalmobs.common.InfernalMobsCore;
+import atomicstryker.infernalmobs.InfernalMobsCore;
+import atomicstryker.infernalmobs.common.mod.InfernalMonster;
 import atomicstryker.infernalmobs.common.mod.MobModifier;
-import atomicstryker.infernalmobs.common.mod.MobModifierType;
+import atomicstryker.infernalmobs.common.mod.ModifierDefinition;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.sounds.SoundEvents;
@@ -20,16 +21,12 @@ public class MM_Ninja extends MobModifier {
     private final static long coolDown = 15000L;
     private long nextAbilityUse = 0L;
 
-    public MM_Ninja() {
-        super();
+    public MM_Ninja(InfernalMonster infernalMonster) {
+        super(infernalMonster);
     }
 
-    public MM_Ninja(MobModifier next) {
-        super(next);
-    }
-
-    protected MobModifierType getMonsterModifierType() {
-        return MobModifierType.NINJA;
+    public ModifierDefinition getModifierDefinition() {
+        return ModifierDefinition.NINJA;
     }
 
     @Override

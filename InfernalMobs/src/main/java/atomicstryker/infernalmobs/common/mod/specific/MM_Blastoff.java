@@ -1,8 +1,9 @@
 package atomicstryker.infernalmobs.common.mod.specific;
 
-import atomicstryker.infernalmobs.common.InfernalMobsCore;
+import atomicstryker.infernalmobs.InfernalMobsCore;
+import atomicstryker.infernalmobs.common.mod.InfernalMonster;
 import atomicstryker.infernalmobs.common.mod.MobModifier;
-import atomicstryker.infernalmobs.common.mod.MobModifierType;
+import atomicstryker.infernalmobs.common.mod.ModifierDefinition;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.server.level.ServerPlayer;
@@ -13,19 +14,14 @@ import net.minecraft.sounds.SoundEvents;
 public class MM_Blastoff extends MobModifier {
 
     private final static long coolDown = 15000L;
-    private static Class<?>[] modBans = {MM_Webber.class};
     private long nextAbilityUse = 0L;
 
-    public MM_Blastoff() {
-        super();
+    public MM_Blastoff(InfernalMonster infernalMonster) {
+        super(infernalMonster);
     }
 
-    public MM_Blastoff(MobModifier next) {
-        super(next);
-    }
-
-    protected MobModifierType getMonsterModifierType() {
-        return MobModifierType.BLAST_OFF;
+    public ModifierDefinition getModifierDefinition() {
+        return ModifierDefinition.BLAST_OFF;
     }
 
     @Override
@@ -64,11 +60,6 @@ public class MM_Blastoff extends MobModifier {
                 InfernalMobsCore.instance().sendVelocityPacket((ServerPlayer) target, 0f, 1.1f, 0f);
             }
         }
-    }
-
-    @Override
-    public Class<?>[] getModsNotToMixWith() {
-        return modBans;
     }
 
 }

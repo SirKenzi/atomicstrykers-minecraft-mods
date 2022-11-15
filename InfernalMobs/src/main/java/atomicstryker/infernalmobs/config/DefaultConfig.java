@@ -1,6 +1,6 @@
 package atomicstryker.infernalmobs.config;
 
-import atomicstryker.infernalmobs.common.mod.MobModifierType;
+import atomicstryker.infernalmobs.common.mod.ModifierDefinition;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 
@@ -77,7 +77,7 @@ public class DefaultConfig {
         defaultConfig.setDimensionIDBlackList(new ArrayList<>());
 
         Map<String, Boolean> modsEnabledMap = new HashMap<>();
-        Arrays.stream(MobModifierType.values()).map(MobModifierType::getModifierTypeClass).forEach(aClass -> {
+        Arrays.stream(ModifierDefinition.values()).map(ModifierDefinition::getModifierImplementation).forEach(aClass -> {
             modsEnabledMap.put(aClass.getSimpleName(), true);
         });
         defaultConfig.setModsEnabled(modsEnabledMap);

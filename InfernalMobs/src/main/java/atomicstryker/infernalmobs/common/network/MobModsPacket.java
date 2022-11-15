@@ -1,7 +1,9 @@
 package atomicstryker.infernalmobs.common.network;
 
+import atomicstryker.infernalmobs.Cache;
 import atomicstryker.infernalmobs.client.InfernalMobsClient;
-import atomicstryker.infernalmobs.common.InfernalMobsCore;
+import atomicstryker.infernalmobs.InfernalMobsCore;
+import atomicstryker.infernalmobs.common.mod.InfernalMonster;
 import atomicstryker.infernalmobs.common.mod.MobModifier;
 import atomicstryker.infernalmobs.common.network.NetworkHelper.IPacket;
 import net.minecraft.network.FriendlyByteBuf;
@@ -12,6 +14,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraftforge.network.NetworkEvent;
 import net.minecraftforge.server.ServerLifecycleHooks;
 
+import java.util.Objects;
 import java.util.function.Supplier;
 
 public class MobModsPacket implements IPacket {
@@ -61,10 +64,10 @@ public class MobModsPacket implements IPacket {
                 Entity ent = p.level.getEntity(mobModsPacket.entID);
                 if (ent instanceof LivingEntity) {
                     LivingEntity e = (LivingEntity) ent;
-                    MobModifier mod = InfernalMobsCore.getMobModifiers(e);
-                    InfernalMobsCore.LOGGER.debug("resolves to entity {} modifiers {}", ent, mod);
-                    if (mod != null) {
-                        mobModsPacket.stringData = mod.getLinkedModNameUntranslated();
+                    InfernalMonster monster = Cache.getInfernalMonster(e);
+                    InfernalMobsCore.LOGGER.debug("resolves to entity {} modifiers {}", ent, monster);
+                    if (Objects.nonNull(monster)) {
+                        mobModsPacket.stringData = monster.getModifierNames();
                         InfernalMobsCore.LOGGER.debug("server sending mods {} for ent-ID {}", mobModsPacket.stringData, mobModsPacket.entID);
                         InfernalMobsCore.instance().networkHelper.sendPacketToPlayer(new MobModsPacket(mobModsPacket.stringData, mobModsPacket.entID, (byte) 1), (ServerPlayer) p);
                         InfernalMobsCore.instance().sendHealthPacket(e);

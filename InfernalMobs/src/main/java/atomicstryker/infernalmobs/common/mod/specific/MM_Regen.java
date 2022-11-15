@@ -1,7 +1,8 @@
 package atomicstryker.infernalmobs.common.mod.specific;
 
+import atomicstryker.infernalmobs.common.mod.InfernalMonster;
 import atomicstryker.infernalmobs.common.mod.MobModifier;
-import atomicstryker.infernalmobs.common.mod.MobModifierType;
+import atomicstryker.infernalmobs.common.mod.ModifierDefinition;
 import net.minecraft.world.entity.LivingEntity;
 
 public class MM_Regen extends MobModifier {
@@ -9,22 +10,18 @@ public class MM_Regen extends MobModifier {
     private final static long coolDown = 1000L;
     private long nextAbilityUse = 0L;
 
-    public MM_Regen() {
-        super();
+    public MM_Regen(InfernalMonster infernalMonster) {
+        super(infernalMonster);
     }
 
-    public MM_Regen(MobModifier next) {
-        super(next);
-    }
-
-    protected MobModifierType getMonsterModifierType() {
-        return MobModifierType.REGEN;
+    public ModifierDefinition getModifierDefinition() {
+        return ModifierDefinition.REGEN;
     }
 
     @Override
     public boolean onUpdate(LivingEntity mob) {
         float health = mob.getHealth();
-        float actualMaxHealth = getActualMaxHealth(mob);
+        float actualMaxHealth = this.getInfernalMonster().getMaxHealth(mob);
         if (!mob.level.isClientSide && health < actualMaxHealth) {
             long time = System.currentTimeMillis();
             if (time > nextAbilityUse) {

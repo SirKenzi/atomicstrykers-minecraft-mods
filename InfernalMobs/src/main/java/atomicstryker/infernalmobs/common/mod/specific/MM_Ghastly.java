@@ -1,7 +1,8 @@
 package atomicstryker.infernalmobs.common.mod.specific;
 
+import atomicstryker.infernalmobs.common.mod.InfernalMonster;
 import atomicstryker.infernalmobs.common.mod.MobModifier;
-import atomicstryker.infernalmobs.common.mod.MobModifierType;
+import atomicstryker.infernalmobs.common.mod.ModifierDefinition;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.projectile.LargeFireball;
@@ -13,15 +14,11 @@ public class MM_Ghastly extends MobModifier {
     private final static float MIN_DISTANCE = 3F;
     private long nextAbilityUse = 0L;
 
-    public MM_Ghastly() {
-        super();
+    public MM_Ghastly(InfernalMonster infernalMonster) {
+        super(infernalMonster);
     }
-
-    public MM_Ghastly(MobModifier next) {
-        super(next);
-    }
-    protected MobModifierType getMonsterModifierType() {
-        return MobModifierType.GHASTLY;
+    public ModifierDefinition getModifierDefinition() {
+        return ModifierDefinition.GHASTLY;
     }
 
     @Override

@@ -1,10 +1,14 @@
 package atomicstryker.infernalmobs.client;
 
-import atomicstryker.infernalmobs.common.InfernalMobsCore;
+import atomicstryker.infernalmobs.Cache;
+import atomicstryker.infernalmobs.InfernalMobsCore;
+import atomicstryker.infernalmobs.common.mod.InfernalMonster;
 import atomicstryker.infernalmobs.common.mod.MobModifier;
+import atomicstryker.infernalmobs.common.mod.MobRarity;
 import atomicstryker.infernalmobs.common.network.HealthPacket;
 import atomicstryker.infernalmobs.common.network.MobModsPacket;
 import atomicstryker.infernalmobs.config.ConfigStore;
+import atomicstryker.infernalmobs.util.NameGenerator;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.Minecraft;
@@ -32,9 +36,7 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 
 import java.lang.reflect.Field;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 @Mod.EventBusSubscriber(value = Dist.CLIENT, bus = Mod.EventBusSubscriber.Bus.MOD, modid = InfernalMobsCore.MOD_ID)
 public class OverlayBossBar {
@@ -96,19 +98,21 @@ public class OverlayBossBar {
             }
 
             if (ent != null) {
-                MobModifier mod = InfernalMobsCore.getMobModifiers(ent);
-                if (mod != null) {
+                InfernalMonster monster = Cache.getInfernalMonster(ent);
+                if (Objects.nonNull(monster)) {
                     askServerHealth(ent);
 
                     UUID uuid = ent.getUUID();
-                    Component name = Component.literal(mod.getEntityDisplayName(ent));
-                    float progress = mod.getActualHealth(ent) / mod.getActualMaxHealth(ent);
+                    Component name = Component.literal(monster.getEntityName());
+                    float progress = monster.getCurrentHealth() / monster.getMaxHealth(ent);
                     if (ent.isDeadOrDying()) {
                         progress = 0.01F;
                     }
-                    int modStr = mod.getModSize();
-                    /* green for elite, yellow for ultra, red for infernal */
-                    BossEvent.BossBarColor color = (modStr <= 5) ? BossEvent.BossBarColor.GREEN : (modStr <= 10) ? BossEvent.BossBarColor.YELLOW : BossEvent.BossBarColor.RED;
+
+                    BossEvent.BossBarColor color =
+                            monster.getRarity() == MobRarity.UNCOMMON ? BossEvent.BossBarColor.GREEN :
+                            monster.getRarity() == MobRarity.RARE ? BossEvent.BossBarColor.YELLOW :
+                            BossEvent.BossBarColor.RED;
 
                     if (!vanillaBossEventsMap.containsKey(uuid)) {
                         // last 3 param bools are darkenScreen, playBossMusic and worldFog
@@ -120,7 +124,7 @@ public class OverlayBossBar {
 
                     // MC supports multiple bosses. Infernal Mobs does not. hide the modifier subdisplay in multi case
                     if (vanillaBossEventsMap.size() == 1) {
-                        drawModifiersUnderHealthBar(poseStack, ent, mod);
+                        drawModifiersUnderHealthBar(poseStack, ent, monster);
                     }
 
                     if (!retained) {
@@ -135,7 +139,7 @@ public class OverlayBossBar {
         }
     }
 
-    private static void drawModifiersUnderHealthBar(PoseStack matrixStack, LivingEntity ent, MobModifier mod) {
+    private static void drawModifiersUnderHealthBar(PoseStack matrixStack, LivingEntity ent, InfernalMonster mod) {
         RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
         RenderSystem.setShaderTexture(0, GUI_BARS_LOCATION);
 
@@ -143,11 +147,11 @@ public class OverlayBossBar {
         Font fontR = mc.font;
 
         int yCoord = 10;
-        String[] display = mod.getDisplayNames();
+        List<String> display = mod.getEntityModifierNames();
         int i = 0;
-        while (i < display.length && display[i] != null) {
+        while (i < display.size()) {
             yCoord += 10;
-            fontR.drawShadow(matrixStack, display[i], screenwidth / 2 - fontR.width(display[i]) / 2, yCoord, 0xffffff);
+            fontR.drawShadow(matrixStack, display.get(i), screenwidth / 2 - fontR.width(display.get(i)) / 2, yCoord, 0xffffff);
             i++;
         }
 

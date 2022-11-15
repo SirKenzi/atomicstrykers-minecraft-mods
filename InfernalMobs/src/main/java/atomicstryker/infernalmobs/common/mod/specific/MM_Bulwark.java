@@ -1,26 +1,19 @@
 package atomicstryker.infernalmobs.common.mod.specific;
 
+import atomicstryker.infernalmobs.common.mod.InfernalMonster;
 import atomicstryker.infernalmobs.common.mod.MobModifier;
-import atomicstryker.infernalmobs.common.mod.MobModifierType;
+import atomicstryker.infernalmobs.common.mod.ModifierDefinition;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.damagesource.DamageSource;
 
 public class MM_Bulwark extends MobModifier {
 
-    public MM_Bulwark() {
-        super();
+    public MM_Bulwark(InfernalMonster infernalMonster) {
+        super(infernalMonster);
     }
 
-    public MM_Bulwark(MobModifier next) {
-        super(next);
-    }
-
-    protected MobModifierType getMonsterModifierType() {
-        return MobModifierType.BULWARK;
-    }
-    @Override
-    public String getModName() {
-        return "Bulwark";
+    public ModifierDefinition getModifierDefinition() {
+        return ModifierDefinition.BULWARK;
     }
 
     @Override

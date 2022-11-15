@@ -2,14 +2,16 @@ package atomicstryker.infernalmobs.common.mod;
 
 import atomicstryker.infernalmobs.common.mod.specific.*;
 
+import java.util.Arrays;
 import java.util.List;
 
-public enum MobModifierType {
+public enum ModifierDefinition {
     UNDYING(
             MM_1UP.class,
             "1UP",
             List.of("recurring", "undying", "twinlived"),
-            List.of("ofRebirth", "theUndying", "ofTwinLives")
+            List.of("ofRebirth", "theUndying", "ofTwinLives"),
+            ModifierType.DEFENSIVE
     ),
     ALCHEMIST(
             MM_Alchemist.class,
@@ -27,13 +29,15 @@ public enum MobModifierType {
             MM_Blastoff.class,
             "Blastoff",
             List.of("thumping", "trolling", "byebye"),
-            List.of("ofMissionControl", "theNASA", "ofWEE")
+            List.of("ofMissionControl", "theNASA", "ofWEE"),
+            ModifierType.MANIPULATION
     ),
     BULWARK(
             MM_Bulwark.class,
             "Bulwark",
             List.of("turtling", "defensive", "armoured"),
-            List.of("ofTurtling", "theDefender", "ofeffingArmor")
+            List.of("ofTurtling", "theDefender", "ofeffingArmor"),
+            ModifierType.DEFENSIVE
     ),
     CHOKE(
             MM_Choke.class,
@@ -81,13 +85,15 @@ public enum MobModifierType {
             MM_Gravity.class,
             "Gravity",
             List.of("repulsing", "sproing"),
-            List.of("ofRepulsion", "theFlipper")
+            List.of("ofRepulsion", "theFlipper"),
+            ModifierType.MANIPULATION
     ),
     LIFESTEAL(
             MM_Lifesteal.class,
             "LifeSteal",
             List.of("vampiric", "transfusing", "bloodsucking"),
-            List.of("theVampire", "ofTransfusion", "theBloodsucker")
+            List.of("theVampire", "ofTransfusion", "theBloodsucker"),
+            ModifierType.DEFENSIVE
     ),
     NINJA(
             MM_Ninja.class,
@@ -135,13 +141,15 @@ public enum MobModifierType {
             MM_Sticky.class,
             "Sticky",
             List.of("thieving", "snagging", "quickfingered"),
-            List.of("ofSnagging", "theQuickFingered", "ofPettyTheft", "yoink")
+            List.of("ofSnagging", "theQuickFingered", "ofPettyTheft", "yoink"),
+            ModifierType.ULTIMATE
     ),
     STORM(
             MM_Storm.class,
             "Storm",
             List.of("striking", "thundering", "electrified"),
-            List.of("ofLightning", "theRaiden")
+            List.of("ofLightning", "theRaiden"),
+            ModifierType.ULTIMATE
     ),
     VENGEANCE(
             MM_Vengeance.class,
@@ -159,7 +167,8 @@ public enum MobModifierType {
             MM_Webber.class,
             "Webber",
             List.of("ensnaring", "webbing"),
-            List.of("ofTraps", "theMutated", "theSpider")
+            List.of("ofTraps", "theMutated", "theSpider"),
+            ModifierType.MANIPULATION
     ),
     WITHER(
             MM_Wither.class,
@@ -167,31 +176,45 @@ public enum MobModifierType {
             List.of("withering"),
             List.of("ofDarkSkulls", "Doomskull")
     );
-    MobModifierType(Class<? extends MobModifier> aClass, String id, List<String> prefixes, List<String> suffixes) {
+
+    ModifierDefinition(Class<? extends MobModifier> aClass, String id, List<String> prefixes, List<String> suffixes) {
+        this(aClass, id, prefixes, suffixes, ModifierType.BASIC);
+    }
+
+    ModifierDefinition(Class<? extends MobModifier> aClass, String id, List<String> prefixes, List<String> suffixes, ModifierType type) {
         this.aClass = aClass;
         this.id = id;
+        this.type = type;
         this.prefixes = prefixes;
         this.suffixes = suffixes;
     }
 
     private final Class<? extends MobModifier> aClass;
     private final String id;
+    private final ModifierType type;
     private final List<String> prefixes;
     private final List<String> suffixes;
 
-    public Class<? extends MobModifier> getModifierTypeClass() {
+    public Class<? extends MobModifier> getModifierImplementation() {
         return aClass;
     }
 
     public String getId() {
         return id;
     }
-
     public List<String> getPrefixes() {
         return prefixes;
     }
 
     public List<String> getSuffixes() {
         return suffixes;
+    }
+
+    public ModifierType getType() {
+        return type;
+    }
+
+    public static ModifierDefinition fromId(String id){
+        return Arrays.stream(values()).filter(modDefinition -> modDefinition.getId().equals(id)).findAny().orElseThrow(IllegalArgumentException::new);
     }
 }

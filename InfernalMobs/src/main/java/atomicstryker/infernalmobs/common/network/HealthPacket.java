@@ -1,7 +1,9 @@
 package atomicstryker.infernalmobs.common.network;
 
+import atomicstryker.infernalmobs.Cache;
 import atomicstryker.infernalmobs.client.InfernalMobsClient;
-import atomicstryker.infernalmobs.common.InfernalMobsCore;
+import atomicstryker.infernalmobs.InfernalMobsCore;
+import atomicstryker.infernalmobs.common.mod.InfernalMonster;
 import atomicstryker.infernalmobs.common.mod.MobModifier;
 import atomicstryker.infernalmobs.common.network.NetworkHelper.IPacket;
 import net.minecraft.network.FriendlyByteBuf;
@@ -11,6 +13,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraftforge.network.NetworkEvent;
 import net.minecraftforge.server.ServerLifecycleHooks;
 
+import java.util.Objects;
 import java.util.function.Supplier;
 
 public class HealthPacket implements IPacket {
@@ -61,8 +64,8 @@ public class HealthPacket implements IPacket {
                     Entity ent = p.level.getEntity(healthPacket.entID);
                     if (ent instanceof LivingEntity) {
                         LivingEntity e = (LivingEntity) ent;
-                        MobModifier mod = InfernalMobsCore.getMobModifiers(e);
-                        if (mod != null) {
+                        InfernalMonster infernalMonster = Cache.getInfernalMonster(e);
+                        if (Objects.nonNull(infernalMonster)) {
                             stringData = healthPacket.stringData;
                             entID = healthPacket.entID;
                             health = e.getHealth();

@@ -1,7 +1,8 @@
 package atomicstryker.infernalmobs.common.mod.specific;
 
+import atomicstryker.infernalmobs.common.mod.InfernalMonster;
 import atomicstryker.infernalmobs.common.mod.MobModifier;
-import atomicstryker.infernalmobs.common.mod.MobModifierType;
+import atomicstryker.infernalmobs.common.mod.ModifierDefinition;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.LightningBolt;
@@ -13,20 +14,14 @@ import net.minecraft.util.Mth;
 public class MM_Storm extends MobModifier {
 
     private final static long coolDown = 25000L;
-    private static Class<?>[] modBans = {MM_Sticky.class};
     private final static float MIN_DISTANCE = 3F;
     private long nextAbilityUse = 0L;
-
-    public MM_Storm() {
-        super();
+    public MM_Storm(InfernalMonster infernalMonster) {
+        super(infernalMonster);
     }
 
-    public MM_Storm(MobModifier next) {
-        super(next);
-    }
-
-    protected MobModifierType getMonsterModifierType() {
-        return MobModifierType.STORM;
+    public ModifierDefinition getModifierDefinition() {
+        return ModifierDefinition.STORM;
     }
 
     @Override
@@ -54,11 +49,6 @@ public class MM_Storm extends MobModifier {
             lightningboltentity.setVisualOnly(false);
             mob.level.addFreshEntity(lightningboltentity);
         }
-    }
-
-    @Override
-    public Class<?>[] getModsNotToMixWith() {
-        return modBans;
     }
 
 }

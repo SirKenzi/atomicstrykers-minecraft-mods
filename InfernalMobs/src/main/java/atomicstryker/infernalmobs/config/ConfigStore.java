@@ -1,5 +1,6 @@
 package atomicstryker.infernalmobs.config;
 
+import atomicstryker.infernalmobs.common.mod.MobRarity;
 import atomicstryker.infernalmobs.util.Helper;
 import net.minecraft.client.Minecraft;
 import net.minecraft.world.entity.LivingEntity;
@@ -12,6 +13,7 @@ import org.apache.logging.log4j.Logger;
 import java.io.File;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Objects;
 
 public class ConfigStore {
 
@@ -30,8 +32,10 @@ public class ConfigStore {
     private static final HashMap<String, Double> classesHealthMap = new HashMap<>();
 
     public static void load(Level world){
-        configFile = new File(getMinecraftFolder(world), File.separatorChar + CONFIG_DIRECTORY_NAME + File.separatorChar + CONFIG_FILE_NAME);
-        loadConfig();
+        if(Objects.isNull(config)) {
+            configFile = new File(getMinecraftFolder(world), File.separatorChar + CONFIG_DIRECTORY_NAME + File.separatorChar + CONFIG_FILE_NAME);
+            loadConfig();
+        }
     }
 
     private static File getMinecraftFolder(Level world){
@@ -58,11 +62,11 @@ public class ConfigStore {
         return config;
     }
 
-    public static List<ItemStack> getLootList(int prefix){
-        return switch (prefix) {
-            case 0 -> lootItemDropsElite.getItemStackList();
-            case 1 -> lootItemDropsUltra.getItemStackList();
-            default -> lootItemDropsInfernal.getItemStackList();
+    public static List<ItemStack> getLootList(MobRarity rarity){
+        return switch (rarity) {
+            case UNCOMMON -> lootItemDropsElite.getItemStackList();
+            case RARE -> lootItemDropsUltra.getItemStackList();
+            case EPIC -> lootItemDropsInfernal.getItemStackList();
         };
     }
 

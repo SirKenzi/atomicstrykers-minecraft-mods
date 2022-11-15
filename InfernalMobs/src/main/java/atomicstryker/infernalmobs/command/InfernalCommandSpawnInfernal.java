@@ -1,8 +1,8 @@
 package atomicstryker.infernalmobs.command;
 
-import atomicstryker.infernalmobs.common.InfernalMobsCore;
-import atomicstryker.infernalmobs.common.mod.MobModifier;
-import atomicstryker.infernalmobs.common.SidedCache;
+import atomicstryker.infernalmobs.InfernalMobsCore;
+import atomicstryker.infernalmobs.common.mod.InfernalMonster;
+import atomicstryker.infernalmobs.Cache;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
@@ -14,6 +14,8 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraftforge.registries.ForgeRegistries;
 import org.apache.logging.log4j.Level;
+
+import java.util.Objects;
 
 public class InfernalCommandSpawnInfernal {
 
@@ -46,12 +48,12 @@ public class InfernalCommandSpawnInfernal {
         mob.setPos(x + 0.5, y + 0.5, z + 0.5);
         source.getLevel().addFreshEntity(mob);
 
-        SidedCache.getInfernalMobs(mob.level).remove(mob);
+        Cache.getInfernalMonsters(mob.level).remove(mob);
         InfernalMobsCore.instance().addEntityModifiersByString(mob, modifiers);
-        MobModifier mod = InfernalMobsCore.getMobModifiers(mob);
-        if (mod != null) {
+        InfernalMonster monster = Cache.getInfernalMonster(mob);
+        if (Objects.nonNull(monster)) {
             InfernalMobsCore.LOGGER.log(Level.INFO,
-                    source.getTextName() + " spawned: " + InfernalMobsCore.getMobModifiers(mob).getLinkedModNameUntranslated() + " at [" + x + "|" + y + "|" + z + "]");
+                    source.getTextName() + " spawned: " + monster.getModifierNames() + " at [" + x + "|" + y + "|" + z + "]");
         } else {
             source.sendFailure(Component.literal("Error adding Infernal Modifier " + modifiers + " to mob " + mob));
         }

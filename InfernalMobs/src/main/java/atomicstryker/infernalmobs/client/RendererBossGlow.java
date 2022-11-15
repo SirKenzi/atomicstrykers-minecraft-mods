@@ -1,8 +1,9 @@
 package atomicstryker.infernalmobs.client;
 
-import atomicstryker.infernalmobs.common.InfernalMobsCore;
+import atomicstryker.infernalmobs.InfernalMobsCore;
+import atomicstryker.infernalmobs.common.mod.InfernalMonster;
 import atomicstryker.infernalmobs.common.mod.MobModifier;
-import atomicstryker.infernalmobs.common.SidedCache;
+import atomicstryker.infernalmobs.Cache;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.particles.ParticleTypes;
@@ -35,7 +36,7 @@ public class RendererBossGlow {
                 return;
             }
             Vec3 curPos = viewEnt.position();
-            Map<LivingEntity, MobModifier> mobsmap = SidedCache.getInfernalMobs(viewEnt.level);
+            Map<LivingEntity, InfernalMonster> mobsmap = Cache.getInfernalMonsters(viewEnt.level);
             mobsmap.keySet().stream().filter(ent -> ent.shouldRenderAtSqrDistance(curPos.distanceToSqr(ent.position()))
                     && ent.isAlive()).forEach(ent -> mc.levelRenderer.addParticle(ParticleTypes.WITCH,
                     false, ent.getX() + (ent.level.random.nextDouble() - 0.5D) * (double) ent.getBbWidth(),

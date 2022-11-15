@@ -1,10 +1,12 @@
 package atomicstryker.infernalmobs.client;
 
-import atomicstryker.infernalmobs.common.InfernalMobsCore;
+import atomicstryker.infernalmobs.InfernalMobsCore;
+import atomicstryker.infernalmobs.common.mod.InfernalMonster;
 import atomicstryker.infernalmobs.common.mod.MobModifier;
-import atomicstryker.infernalmobs.common.SidedCache;
+import atomicstryker.infernalmobs.Cache;
 import atomicstryker.infernalmobs.common.mod.specific.MM_Gravity;
 import atomicstryker.infernalmobs.common.network.MobModsPacket;
+import atomicstryker.infernalmobs.config.ConfigStore;
 import net.minecraft.client.Minecraft;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
@@ -17,7 +19,7 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.DistExecutor;
 import net.minecraftforge.fml.common.Mod;
 
-import java.io.File;
+import java.util.Objects;
 
 @Mod.EventBusSubscriber(value = Dist.CLIENT, modid = InfernalMobsCore.MOD_ID)
 public class InfernalMobsClient {
@@ -28,7 +30,7 @@ public class InfernalMobsClient {
     public static void playerLoginToServer(ClientPlayerNetworkEvent.LoggingIn evt) {
         // client starting point, also local servers
         mc = Minecraft.getInstance();
-        InfernalMobsCore.instance().initIfNeeded(evt.getPlayer().level);
+        ConfigStore.load(evt.getPlayer().level);
     }
 
     @SubscribeEvent
@@ -42,7 +44,7 @@ public class InfernalMobsClient {
     @SubscribeEvent
     public static void playerLoggedOut(ClientPlayerNetworkEvent.LoggingOut evt) {
         if (evt.getPlayer() != null) {
-            SidedCache.getInfernalMobs(evt.getPlayer().level).clear();
+            Cache.getInfernalMonsters(evt.getPlayer().level).clear();
         }
     }
 
@@ -53,9 +55,10 @@ public class InfernalMobsClient {
     private static void onHealthPacket(int entID, float health, float maxhealth) {
         Entity ent = Minecraft.getInstance().level.getEntity(entID);
         if (ent instanceof LivingEntity) {
-            MobModifier mod = InfernalMobsCore.getMobModifiers((LivingEntity) ent);
-            if (mod != null) {
-                mod.setActualHealth(health, maxhealth);
+            InfernalMonster monster = Cache.getInfernalMonster((LivingEntity)ent);
+            if (Objects.nonNull(monster)) {
+                monster.setCurrentHealth(health);
+                monster.setMaxHealth(maxhealth);
             }
         }
     }

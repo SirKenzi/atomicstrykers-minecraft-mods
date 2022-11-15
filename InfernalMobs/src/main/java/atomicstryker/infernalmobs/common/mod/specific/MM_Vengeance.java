@@ -1,28 +1,20 @@
 package atomicstryker.infernalmobs.common.mod.specific;
 
-import atomicstryker.infernalmobs.common.InfernalMobsCore;
+import atomicstryker.infernalmobs.InfernalMobsCore;
+import atomicstryker.infernalmobs.common.mod.InfernalMonster;
 import atomicstryker.infernalmobs.common.mod.MobModifier;
-import atomicstryker.infernalmobs.common.mod.MobModifierType;
+import atomicstryker.infernalmobs.common.mod.ModifierDefinition;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.damagesource.DamageSource;
 
 public class MM_Vengeance extends MobModifier {
 
-    public MM_Vengeance() {
-        super();
+    public MM_Vengeance(InfernalMonster infernalMonster) {
+        super(infernalMonster);
     }
 
-    public MM_Vengeance(MobModifier next) {
-        super(next);
-    }
-
-    protected MobModifierType getMonsterModifierType() {
-        return MobModifierType.VENGEANCE;
-    }
-
-    @Override
-    public String getModName() {
-        return "Vengeance";
+    public ModifierDefinition getModifierDefinition() {
+        return ModifierDefinition.VENGEANCE;
     }
 
     @Override

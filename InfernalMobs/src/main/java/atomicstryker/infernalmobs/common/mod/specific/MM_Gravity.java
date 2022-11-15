@@ -1,8 +1,9 @@
 package atomicstryker.infernalmobs.common.mod.specific;
 
-import atomicstryker.infernalmobs.common.InfernalMobsCore;
+import atomicstryker.infernalmobs.InfernalMobsCore;
+import atomicstryker.infernalmobs.common.mod.InfernalMonster;
 import atomicstryker.infernalmobs.common.mod.MobModifier;
-import atomicstryker.infernalmobs.common.mod.MobModifierType;
+import atomicstryker.infernalmobs.common.mod.ModifierDefinition;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
@@ -13,19 +14,14 @@ import net.minecraft.world.entity.player.Player;
 public class MM_Gravity extends MobModifier {
 
     private final static long coolDown = 5000L;
-    private static Class<?>[] modBans = {MM_Webber.class};
     private long nextAbilityUse = 0L;
 
-    public MM_Gravity() {
-        super();
+    public MM_Gravity(InfernalMonster infernalMonster) {
+        super(infernalMonster);
     }
 
-    public MM_Gravity(MobModifier next) {
-        super(next);
-    }
-
-    protected MobModifierType getMonsterModifierType() {
-        return MobModifierType.GRAVITY;
+    public ModifierDefinition getModifierDefinition() {
+        return ModifierDefinition.GRAVITY;
     }
 
     public static void knockBack(LivingEntity target, double x, double z) {
@@ -82,11 +78,6 @@ public class MM_Gravity extends MobModifier {
                 InfernalMobsCore.instance().sendKnockBackPacket((ServerPlayer) target, (float) diffX, (float) diffZ);
             }
         }
-    }
-
-    @Override
-    public Class<?>[] getModsNotToMixWith() {
-        return modBans;
     }
 
 }

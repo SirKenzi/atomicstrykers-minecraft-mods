@@ -1,8 +1,9 @@
 package atomicstryker.infernalmobs.common.mod.specific;
 
-import atomicstryker.infernalmobs.common.InfernalMobsCore;
+import atomicstryker.infernalmobs.InfernalMobsCore;
+import atomicstryker.infernalmobs.common.mod.InfernalMonster;
 import atomicstryker.infernalmobs.common.mod.MobModifier;
-import atomicstryker.infernalmobs.common.mod.MobModifierType;
+import atomicstryker.infernalmobs.common.mod.ModifierDefinition;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
@@ -11,16 +12,12 @@ import net.minecraft.world.damagesource.IndirectEntityDamageSource;
 
 public class MM_Poisonous extends MobModifier {
 
-    public MM_Poisonous() {
-        super();
+    public MM_Poisonous(InfernalMonster infernalMonster) {
+        super(infernalMonster);
     }
 
-    public MM_Poisonous(MobModifier next) {
-        super(next);
-    }
-
-    protected MobModifierType getMonsterModifierType() {
-        return MobModifierType.POISONOUS;
+    public ModifierDefinition getModifierDefinition() {
+        return ModifierDefinition.POISONOUS;
     }
     @Override
     public float onHurt(LivingEntity mob, DamageSource source, float damage) {

@@ -1,4 +1,4 @@
-{
+ {
     "translation.infernalmobs:rareClass": "Rare",
     "translation.infernalmobs:infernalClass": "Infernal",
     "translation.infernalmobs:ultraClass": "Ultra",
@@ -179,9 +179,9 @@
     "translation.infernalmobs:mod.Webber": "Webber",
     "translation.infernalmobs:mod.Wither": "Wither",
 
-    "translation.infernalmobs:entity.Creeper": "Creeper",
-    "translation.infernalmobs:entity.Zombie": "Zombie",
-    "translation.infernalmobs:entity.Skeleton": "Skeleton",
-    "translation.infernalmobs:entity.Spider": "Spider",
-    "translation.infernalmobs:entity.Enderman": "Enderman"
+    "translation.infernalmobs:entity.creeper": "Creeper",
+    "translation.infernalmobs:entity.zombie": "Zombie",
+    "translation.infernalmobs:entity.skeleton": "Skeleton",
+    "translation.infernalmobs:entity.spider": "Spider",
+    "translation.infernalmobs:entity.enderman": "Enderman"
 }

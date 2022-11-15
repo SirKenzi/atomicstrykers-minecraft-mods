@@ -1,8 +1,9 @@
 package atomicstryker.infernalmobs.common.mod.specific;
 
-import atomicstryker.infernalmobs.common.InfernalMobsCore;
+import atomicstryker.infernalmobs.InfernalMobsCore;
+import atomicstryker.infernalmobs.common.mod.InfernalMonster;
 import atomicstryker.infernalmobs.common.mod.MobModifier;
-import atomicstryker.infernalmobs.common.mod.MobModifierType;
+import atomicstryker.infernalmobs.common.mod.ModifierDefinition;
 import atomicstryker.infernalmobs.common.mod.util.ChokedEntity;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.damagesource.DamageSource;
@@ -19,20 +20,13 @@ public class MM_Choke extends MobModifier {
 
     private final List<ChokedEntity> chokedEntityList;
 
-    private final static int RESET_AIR_VALUE = -999;
-
-    public MM_Choke() {
-        super();
+    public MM_Choke(InfernalMonster infernalMonster) {
+        super(infernalMonster);
         this.chokedEntityList = new ArrayList<>();
     }
 
-    public MM_Choke(MobModifier next) {
-        super(next);
-        this.chokedEntityList = new ArrayList<>();
-    }
-
-    protected MobModifierType getMonsterModifierType() {
-        return MobModifierType.CHOKE;
+    public ModifierDefinition getModifierDefinition() {
+        return ModifierDefinition.CHOKE;
     }
 
     @Override
@@ -77,7 +71,7 @@ public class MM_Choke extends MobModifier {
             chokedEntity.setAir(chokedEntity.getTarget().getMaxAirSupply());
         });
         updateAir();
-        return false;
+        return super.onDeath();
     }
 
     private void updateAir() {
@@ -85,14 +79,9 @@ public class MM_Choke extends MobModifier {
             chokedEntity.getTarget().setAirSupply(chokedEntity.getAir());
             if( chokedEntity.getTarget() instanceof ServerPlayer){
                 InfernalMobsCore.instance().sendAirPacket((ServerPlayer) chokedEntity.getTarget(), chokedEntity.getAir());
-                InfernalMobsCore.instance().getModifiedPlayerTimes().put(chokedEntity.getTarget().getName().getString(), System.currentTimeMillis());
+                //todo: InfernalMobsCore.instance().getModifiedPlayerTimes().put(chokedEntity.getTarget().getName().getString(), System.currentTimeMillis());
             }
         });
-    }
-
-    @Override
-    public void resetModifiedVictim(Player victim) {
-        victim.setAirSupply(RESET_AIR_VALUE);
     }
 
     @Override

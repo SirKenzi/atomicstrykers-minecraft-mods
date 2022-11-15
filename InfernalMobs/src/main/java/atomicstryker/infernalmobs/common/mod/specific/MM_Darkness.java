@@ -1,8 +1,9 @@
 package atomicstryker.infernalmobs.common.mod.specific;
 
-import atomicstryker.infernalmobs.common.InfernalMobsCore;
+import atomicstryker.infernalmobs.InfernalMobsCore;
+import atomicstryker.infernalmobs.common.mod.InfernalMonster;
 import atomicstryker.infernalmobs.common.mod.MobModifier;
-import atomicstryker.infernalmobs.common.mod.MobModifierType;
+import atomicstryker.infernalmobs.common.mod.ModifierDefinition;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
@@ -10,16 +11,12 @@ import net.minecraft.world.damagesource.DamageSource;
 
 public class MM_Darkness extends MobModifier {
 
-    public MM_Darkness() {
-        super();
+    public MM_Darkness(InfernalMonster infernalMonster) {
+        super(infernalMonster);
     }
 
-    public MM_Darkness(MobModifier next) {
-        super(next);
-    }
-
-    protected MobModifierType getMonsterModifierType() {
-        return MobModifierType.DARKNESS;
+    public ModifierDefinition getModifierDefinition() {
+        return ModifierDefinition.DARKNESS;
     }
 
     @Override
