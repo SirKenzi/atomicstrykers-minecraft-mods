@@ -4,10 +4,8 @@ import atomicstryker.infernalmobs.command.InfernalCommandFindEntityClass;
 import atomicstryker.infernalmobs.command.InfernalCommandSpawnInfernal;
 import atomicstryker.infernalmobs.common.mod.InfernalMonster;
 import atomicstryker.infernalmobs.common.mod.InfernalMonsterGenerator;
-import atomicstryker.infernalmobs.common.mod.ModifierDefinition;
 import atomicstryker.infernalmobs.event.EntityEventHandler;
 import atomicstryker.infernalmobs.event.InfernalEntityDropHandler;
-import atomicstryker.infernalmobs.common.mod.MobModifier;
 import atomicstryker.infernalmobs.config.*;
 import atomicstryker.infernalmobs.common.network.*;
 import atomicstryker.infernalmobs.event.SaveEventHandler;
@@ -21,7 +19,6 @@ import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.monster.Enemy;
 import net.minecraft.world.level.Level;
 import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.common.util.FakePlayer;
 import net.minecraftforge.event.RegisterCommandsEvent;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.server.ServerStartedEvent;
@@ -32,7 +29,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Mod(InfernalMobsCore.MOD_ID)
 @Mod.EventBusSubscriber(modid = InfernalMobsCore.MOD_ID)
@@ -195,13 +191,13 @@ public class InfernalMobsCore {
     }
 
     public void sendVelocityPacket(ServerPlayer target, float xVel, float yVel, float zVel) {
-        if (getIsEntityAllowedTarget(target)) {
+        if (Helper.isEntityValidTarget(target)) {
             networkHelper.sendPacketToPlayer(new VelocityPacket(xVel, yVel, zVel), target);
         }
     }
 
     public void sendKnockBackPacket(ServerPlayer target, float xVel, float zVel) {
-        if (getIsEntityAllowedTarget(target)) {
+        if (Helper.isEntityValidTarget(target)) {
             networkHelper.sendPacketToPlayer(new KnockBackPacket(xVel, zVel), target);
         }
     }
@@ -215,7 +211,7 @@ public class InfernalMobsCore {
     }
 
     public void sendAirPacket(ServerPlayer target, int lastAir) {
-        if (getIsEntityAllowedTarget(target)) {
+        if (Helper.isEntityValidTarget(target)) {
             networkHelper.sendPacketToPlayer(new AirPacket(lastAir), target);
         }
     }
@@ -240,10 +236,6 @@ public class InfernalMobsCore {
 
     public float getLimitedDamage(float test) {
         return (float) Math.min(test, ConfigStore.getConfig().getMaxDamage());
-    }
-
-    public boolean getIsEntityAllowedTarget(Entity entity) {
-        return !(entity instanceof FakePlayer);
     }
 
     /**

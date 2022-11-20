@@ -74,12 +74,22 @@ public class InfernalEntityDropHandler {
         if (item instanceof EnchantedBookItem) {
             itemStack = EnchantedBookItem.createForEnchantment(getRandomBookEnchantment(mob.getRandom()));
         } else {
-            if( item.isEnchantable(itemStack)){
-                EnchantmentHelper.enchantItem(mob.level.random, itemStack, rarity.getEnchantLevel(), true);
-            }
+            enchantRandomly(mob.getRandom(), itemStack, item.getEnchantmentValue(itemStack), rarity.getEnchantLevel());
         }
         ItemEntity itemEnt = new ItemEntity(mob.level, mob.getX(), mob.getY(), mob.getZ(), itemStack);
         mob.level.addFreshEntity(itemEnt);
+    }
+
+    private void enchantRandomly(RandomSource rand, ItemStack itemStack, int itemEnchantability, int amount) {
+        System.out.println(itemEnchantability);
+        List<?> enchantments = EnchantmentHelper.selectEnchantment(rand, itemStack, itemEnchantability, true);
+        Iterator<?> iter = enchantments.iterator();
+        System.out.println(enchantments);
+        while (iter.hasNext() && amount-- > 0) {
+            System.out.println("ENCHANT");
+            EnchantmentInstance eData = (EnchantmentInstance) iter.next();
+            itemStack.enchant(eData.enchantment, eData.level);
+        }
     }
 
     private EnchantmentInstance getRandomBookEnchantment(RandomSource rand) {

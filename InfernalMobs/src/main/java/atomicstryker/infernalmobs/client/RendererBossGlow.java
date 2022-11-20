@@ -2,7 +2,6 @@ package atomicstryker.infernalmobs.client;
 
 import atomicstryker.infernalmobs.InfernalMobsCore;
 import atomicstryker.infernalmobs.common.mod.InfernalMonster;
-import atomicstryker.infernalmobs.common.mod.MobModifier;
 import atomicstryker.infernalmobs.Cache;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.Minecraft;

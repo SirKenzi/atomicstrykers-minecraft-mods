@@ -115,12 +115,13 @@ public class ConfigStore {
             return classesHealthMap.get(entName);
         }
 
-        double result = entity.getMaxHealth();
-        if (!getConfig().getEntitybasehealth().containsKey(entName)) {
-            getConfig().getEntitybasehealth().put(entName, (double) entity.getMaxHealth());
-            saveConfig();
-        } else {
+        double result;
+        if (getConfig().getEntitybasehealth().containsKey(entName)) {
             result = getConfig().getEntitybasehealth().get(entName);
+        } else {
+            result = entity.getMaxHealth();
+            getConfig().getEntitybasehealth().put(entName, result);
+            saveConfig();
         }
         classesHealthMap.put(entName, result);
         return result;

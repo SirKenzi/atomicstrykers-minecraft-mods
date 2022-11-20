@@ -4,9 +4,9 @@ import atomicstryker.infernalmobs.config.ConfigStore;
 import net.minecraft.util.RandomSource;
 
 public enum MobRarity {
-    UNCOMMON(2,3, 50, 12),
-    RARE(5,4, 150, 30),
-    EPIC(8, 12, 300, 62);
+    UNCOMMON(2,3, 50, 2),
+    RARE(5,4, 150, 3),
+    EPIC(8, 12, 300, 5);
 
     MobRarity(int baseNumberOfModifiers, int maximumNumberOfAdditionalModifiers, int xp, int enchantLevel) {
         this.baseNumberOfModifiers = baseNumberOfModifiers;

@@ -1,9 +1,9 @@
 package atomicstryker.infernalmobs.common.mod.specific;
 
-import atomicstryker.infernalmobs.InfernalMobsCore;
 import atomicstryker.infernalmobs.common.mod.InfernalMonster;
 import atomicstryker.infernalmobs.common.mod.MobModifier;
 import atomicstryker.infernalmobs.common.mod.ModifierDefinition;
+import atomicstryker.infernalmobs.util.Helper;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.LivingEntity;
@@ -22,7 +22,7 @@ public class MM_Quicksand extends MobModifier {
     @Override
     public boolean onUpdate(LivingEntity mob) {
         if (hasSteadyTarget()
-                && InfernalMobsCore.instance().getIsEntityAllowedTarget(getMobTarget())
+                && Helper.isEntityValidTarget(getMobTarget())
                 && canMobSeeTarget(mob, getMobTarget())
                 && ++ticker == 50) {
             ticker = 0;

@@ -8,6 +8,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.Level;
+import net.minecraftforge.common.util.FakePlayer;
 import net.minecraftforge.registries.ForgeRegistries;
 
 import java.util.Arrays;
@@ -54,5 +55,9 @@ public class Helper {
             System.err.println("If this message is spamming too much for your taste set useSimpleEntityClassnames true in your Infernal Mobs config");
         }
         return result;
+    }
+
+    public static boolean isEntityValidTarget(Entity entity) {
+        return !(entity instanceof FakePlayer);
     }
 }

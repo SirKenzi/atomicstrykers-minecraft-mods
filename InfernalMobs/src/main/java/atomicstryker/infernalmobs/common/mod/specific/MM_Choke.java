@@ -79,7 +79,6 @@ public class MM_Choke extends MobModifier {
             chokedEntity.getTarget().setAirSupply(chokedEntity.getAir());
             if( chokedEntity.getTarget() instanceof ServerPlayer){
                 InfernalMobsCore.instance().sendAirPacket((ServerPlayer) chokedEntity.getTarget(), chokedEntity.getAir());
-                //todo: InfernalMobsCore.instance().getModifiedPlayerTimes().put(chokedEntity.getTarget().getName().getString(), System.currentTimeMillis());
             }
         });
     }

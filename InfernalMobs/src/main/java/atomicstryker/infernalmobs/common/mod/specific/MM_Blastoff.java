@@ -26,8 +26,7 @@ public class MM_Blastoff extends MobModifier {
 
     @Override
     public boolean onUpdate(LivingEntity mob) {
-        if (hasSteadyTarget()
-                && getMobTarget() instanceof Player) {
+        if (hasSteadyTarget() && getMobTarget() instanceof Player) {
             tryAbility(mob, getMobTarget());
         }
 
