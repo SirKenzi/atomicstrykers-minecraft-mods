@@ -5,6 +5,8 @@ import atomicstryker.infernalmobs.common.mod.MobModifier;
 import atomicstryker.infernalmobs.common.mod.MobRarity;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.resources.language.I18n;
+import net.minecraft.network.chat.contents.LiteralContents;
+import net.minecraft.network.chat.contents.TranslatableContents;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraftforge.registries.ForgeRegistries;
@@ -41,23 +43,20 @@ public class NameGenerator {
             String prefix = I18n.get(Tag.TRANSLATION_PREFIX_KEY.getId() + prefixes.get(randomSource.nextInt(prefixes.size())));
             List<String> suffixes = monster.getModifiers().get(1).getModifierDefinition().getSuffixes();
             String suffix = I18n.get(Tag.TRANSLATION_SUFFIX_KEY.getId() + suffixes.get(randomSource.nextInt(suffixes.size())));
-            return String.format("%s %s %s %s", entityName, prefix, type, suffix);
+            return String.format("%s %s %s %s", prefix, suffix, type, entityName);
         }
 
-        return String.format("%s %s", entityName, type);
+        return String.format("%s %s", type,  entityName);
     }
 
     private static String getEntityName(LivingEntity entity){
-        String buffer = ForgeRegistries.ENTITY_TYPES.getKey(entity.getType()).getPath();
-
-        String[] subStrings = buffer.split("\\."); // in case of Package.Class.EntityName derps
-        if (subStrings.length > 1) {
-            buffer = subStrings[subStrings.length - 1]; // reduce that to EntityName before proceeding
+        if( entity.getDisplayName().getContents() instanceof TranslatableContents){
+            return I18n.get(((TranslatableContents)entity.getDisplayName().getContents()).getKey());
         }
-        buffer = buffer.replaceFirst("Entity", "");
-
-        buffer  = I18n.get(Tag.TRANSLATION_ENTITY_KEY.getId() + buffer);
-        return buffer.substring(0, 1).toUpperCase() + buffer.substring(1);
+        if( entity.getDisplayName().getContents() instanceof LiteralContents){
+            return I18n.get(((TranslatableContents)entity.getDisplayName().getContents()).getKey());
+        }
+        return entity.getDisplayName().toString();
     }
 
     private static String getTypeName(MobRarity rarity){
