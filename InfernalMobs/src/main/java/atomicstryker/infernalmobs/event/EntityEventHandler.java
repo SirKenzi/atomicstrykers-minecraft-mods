@@ -7,6 +7,7 @@ import atomicstryker.infernalmobs.util.MobFarmGuard;
 import atomicstryker.infernalmobs.util.Tag;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Player;
 import net.minecraftforge.event.entity.EntityJoinLevelEvent;
 import net.minecraftforge.event.entity.living.*;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -20,7 +21,7 @@ public class EntityEventHandler {
         if (event.getEntity() instanceof LivingEntity) {
             String savedMods = event.getEntity().getPersistentData().getString(Tag.NBT_TAG.getId());
             if (!savedMods.isEmpty() && !savedMods.equals(InfernalMobsCore.instance().getNBTMarkerForNonInfernalEntities())) {
-                InfernalMobsCore.instance().addEntityModifiersByString((LivingEntity) event.getEntity(), savedMods);
+                InfernalMobsCore.instance().addModifiersToEntityFromString((LivingEntity) event.getEntity(), savedMods);
             } else {
                 InfernalMobsCore.instance().processEntitySpawn((LivingEntity) event.getEntity());
             }
@@ -32,7 +33,7 @@ public class EntityEventHandler {
         if (!event.getEntity().level.isClientSide) {
             InfernalMonster monster = Cache.getInfernalMonster(event.getEntity());
             if(Objects.nonNull(monster)){
-                event.setCanceled(monster.handleDeath());
+                event.setCanceled(monster.handleDeath(event.getEntity()));
             }
         }
     }
@@ -49,6 +50,9 @@ public class EntityEventHandler {
 
     @SubscribeEvent
     public void onEntityLivingAttacked(LivingAttackEvent event) {
+        if( event.getSource().getEntity() instanceof Player){
+            System.out.println("PLAYER ATTACKED");
+        }
         /* fires both client and server before hurt, but we dont need this */
     }
 
@@ -110,7 +114,7 @@ public class EntityEventHandler {
         if (event.getEntity().tickCount == 1) {
             String savedMods = event.getEntity().getPersistentData().getString(Tag.NBT_TAG.getId());
             if (!savedMods.isEmpty() && !savedMods.equals(InfernalMobsCore.instance().getNBTMarkerForNonInfernalEntities())) {
-                InfernalMobsCore.instance().addEntityModifiersByString(event.getEntity(), savedMods);
+                InfernalMobsCore.instance().addModifiersToEntityFromString(event.getEntity(), savedMods);
             }
         }
     }

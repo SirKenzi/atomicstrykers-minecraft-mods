@@ -4,7 +4,6 @@ package atomicstryker.infernalmobs.event;
 import atomicstryker.infernalmobs.Cache;
 import atomicstryker.infernalmobs.InfernalMobsCore;
 import atomicstryker.infernalmobs.common.mod.InfernalMonster;
-import atomicstryker.infernalmobs.common.mod.MobModifier;
 import atomicstryker.infernalmobs.common.mod.MobRarity;
 import atomicstryker.infernalmobs.config.ConfigStore;
 import net.minecraft.util.RandomSource;
@@ -51,7 +50,7 @@ public class InfernalEntityDropHandler {
                 MobRarity rarity = monster.getRarity();
                 this.handleXpAwards(event.getEntity(), rarity);
                 this.handleItemAwards(event.getEntity(), rarity);
-                InfernalMobsCore.removeEntFromElites(event.getEntity());
+                Cache.getInfernalMonsters(event.getEntity().level).remove(event.getEntity());
             }
         }
     }

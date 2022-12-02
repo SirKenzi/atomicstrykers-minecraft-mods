@@ -49,7 +49,7 @@ public class InfernalCommandSpawnInfernal {
         source.getLevel().addFreshEntity(mob);
 
         Cache.getInfernalMonsters(mob.level).remove(mob);
-        InfernalMobsCore.instance().addEntityModifiersByString(mob, modifiers);
+        InfernalMobsCore.instance().addModifiersToEntityFromString(mob, modifiers);
         InfernalMonster monster = Cache.getInfernalMonster(mob);
         if (Objects.nonNull(monster)) {
             InfernalMobsCore.LOGGER.log(Level.INFO,

@@ -3,12 +3,9 @@ package atomicstryker.infernalmobs.client;
 import atomicstryker.infernalmobs.Cache;
 import atomicstryker.infernalmobs.InfernalMobsCore;
 import atomicstryker.infernalmobs.common.mod.InfernalMonster;
-import atomicstryker.infernalmobs.common.mod.MobModifier;
 import atomicstryker.infernalmobs.common.mod.MobRarity;
-import atomicstryker.infernalmobs.common.network.HealthPacket;
-import atomicstryker.infernalmobs.common.network.MobModsPacket;
+import atomicstryker.infernalmobs.common.network.PacketSender;
 import atomicstryker.infernalmobs.config.ConfigStore;
-import atomicstryker.infernalmobs.util.NameGenerator;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.Minecraft;
@@ -97,44 +94,44 @@ public class OverlayBossBar {
                 }
             }
 
-            if (ent != null) {
-                InfernalMonster monster = Cache.getInfernalMonster(ent);
-                if (Objects.nonNull(monster)) {
-                    askServerHealth(ent);
-
-                    UUID uuid = ent.getUUID();
-                    Component name = Component.literal(monster.getEntityName());
-                    float progress = monster.getCurrentHealth() / monster.getMaxHealth(ent);
-                    if (ent.isDeadOrDying()) {
-                        progress = 0.01F;
-                    }
-
-                    BossEvent.BossBarColor color =
-                            monster.getRarity() == MobRarity.UNCOMMON ? BossEvent.BossBarColor.GREEN :
-                            monster.getRarity() == MobRarity.RARE ? BossEvent.BossBarColor.YELLOW :
-                            BossEvent.BossBarColor.RED;
-
-                    if (!vanillaBossEventsMap.containsKey(uuid)) {
-                        // last 3 param bools are darkenScreen, playBossMusic and worldFog
-                        vanillaBossEventsMap.put(uuid, new LerpingBossEvent(uuid, name, progress, color, BossEvent.BossBarOverlay.PROGRESS, false, false, false));
-                    } else {
-                        LerpingBossEvent bossEvent = vanillaBossEventsMap.get(uuid);
-                        bossEvent.setProgress(progress);
-                    }
-
-                    // MC supports multiple bosses. Infernal Mobs does not. hide the modifier subdisplay in multi case
-                    if (vanillaBossEventsMap.size() == 1) {
-                        drawModifiersUnderHealthBar(poseStack, ent, monster);
-                    }
-
-                    if (!retained) {
-                        retainedTarget = ent;
-                        healthBarRetainTime = System.currentTimeMillis() + 3000L;
-                    }
-
-                } else {
-                    askServerMods(ent);
+            if (Objects.isNull(ent)) {
+                return;
+            }
+            InfernalMonster monster = Cache.getInfernalMonster(ent);
+            if (Objects.nonNull(monster)) {
+                askServerHealth(ent);
+                UUID uuid = ent.getUUID();
+                Component name = Component.literal(monster.getEntityName());
+                float progress = monster.getCurrentHealth() / monster.getMaxHealth(ent);
+                if (ent.isDeadOrDying()) {
+                    progress = 0.01F;
                 }
+
+                BossEvent.BossBarColor color =
+                        monster.getRarity() == MobRarity.UNCOMMON ? BossEvent.BossBarColor.GREEN :
+                        monster.getRarity() == MobRarity.RARE ? BossEvent.BossBarColor.YELLOW :
+                        BossEvent.BossBarColor.RED;
+
+                if (!vanillaBossEventsMap.containsKey(uuid)) {
+                    // last 3 param bools are darkenScreen, playBossMusic and worldFog
+                    vanillaBossEventsMap.put(uuid, new LerpingBossEvent(uuid, name, progress, color, BossEvent.BossBarOverlay.PROGRESS, false, false, false));
+                } else {
+                    LerpingBossEvent bossEvent = vanillaBossEventsMap.get(uuid);
+                    bossEvent.setProgress(progress);
+                }
+
+                // MC supports multiple bosses. Infernal Mobs does not. hide the modifier subdisplay in multi case
+                if (vanillaBossEventsMap.size() == 1) {
+                    drawModifiersUnderHealthBar(poseStack, ent, monster);
+                }
+
+                if (!retained) {
+                    retainedTarget = ent;
+                    healthBarRetainTime = System.currentTimeMillis() + 3000L;
+                }
+
+            } else {
+                askServerMods(ent);
             }
         }
     }
@@ -188,15 +185,14 @@ public class OverlayBossBar {
 
     private static void askServerMods(Entity ent) {
         if (System.currentTimeMillis() > nextPacketTime && (ent instanceof Mob || (ent instanceof LivingEntity && ent instanceof Enemy))) {
-            InfernalMobsCore.instance().networkHelper.sendPacketToServer(new MobModsPacket(mc.player.getName().getString(), ent.getId(), (byte) 0));
-            InfernalMobsCore.LOGGER.debug("askServerMods {}, ent-id {} querying modifiers from server", ent, ent.getId());
+            PacketSender.requestMobModifiersInformationFromServer((LivingEntity) ent);
             nextPacketTime = System.currentTimeMillis() + 250L;
         }
     }
 
     private static void askServerHealth(Entity ent) {
-        if (System.currentTimeMillis() > nextPacketTime) {
-            InfernalMobsCore.instance().networkHelper.sendPacketToServer(new HealthPacket(mc.player.getName().getString(), ent.getId(), 0f, 0f));
+        if (System.currentTimeMillis() > nextPacketTime && ent instanceof LivingEntity) {
+            PacketSender.requestHealthInformationFromServer((LivingEntity) ent);
             nextPacketTime = System.currentTimeMillis() + 250L;
         }
     }

@@ -4,6 +4,7 @@ import atomicstryker.infernalmobs.InfernalMobsCore;
 import atomicstryker.infernalmobs.common.mod.InfernalMonster;
 import atomicstryker.infernalmobs.common.mod.MobModifier;
 import atomicstryker.infernalmobs.common.mod.ModifierDefinition;
+import atomicstryker.infernalmobs.common.network.PacketSender;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.server.level.ServerPlayer;
@@ -56,7 +57,7 @@ public class MM_Blastoff extends MobModifier {
             if (target.level.isClientSide || !(target instanceof ServerPlayer)) {
                 target.push(0, 1.1D, 0);
             } else {
-                InfernalMobsCore.instance().sendVelocityPacket((ServerPlayer) target, 0f, 1.1f, 0f);
+                PacketSender.sendVelocityPacket((ServerPlayer) target, 0f, 1.1f, 0f);
             }
         }
     }

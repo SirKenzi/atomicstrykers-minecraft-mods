@@ -2,16 +2,23 @@ package atomicstryker.infernalmobs;
 
 import atomicstryker.infernalmobs.command.InfernalCommandFindEntityClass;
 import atomicstryker.infernalmobs.command.InfernalCommandSpawnInfernal;
+import atomicstryker.infernalmobs.common.effect.InfernalEffects;
 import atomicstryker.infernalmobs.common.mod.InfernalMonster;
 import atomicstryker.infernalmobs.common.mod.InfernalMonsterGenerator;
+import atomicstryker.infernalmobs.common.network.packet.*;
+import atomicstryker.infernalmobs.common.network.packet.information.HealthInformationPacket;
+import atomicstryker.infernalmobs.common.network.packet.information.MobModifiersInformationPacket;
+import atomicstryker.infernalmobs.common.network.packet.information.RequestHealthInformationPacket;
+import atomicstryker.infernalmobs.common.network.packet.information.RequestMobModifiersInformationPacket;
+import atomicstryker.infernalmobs.common.sound.InfernalSounds;
 import atomicstryker.infernalmobs.event.EntityEventHandler;
 import atomicstryker.infernalmobs.event.InfernalEntityDropHandler;
 import atomicstryker.infernalmobs.config.*;
 import atomicstryker.infernalmobs.common.network.*;
 import atomicstryker.infernalmobs.event.SaveEventHandler;
+import atomicstryker.infernalmobs.event.StunEventHandler;
 import atomicstryker.infernalmobs.util.Helper;
 import atomicstryker.infernalmobs.util.Tag;
-import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.TamableAnimal;
@@ -22,9 +29,10 @@ import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.RegisterCommandsEvent;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.server.ServerStartedEvent;
+import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.network.PacketDistributor;
+import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -39,7 +47,6 @@ public class InfernalMobsCore {
     public static Logger LOGGER;
     private static InfernalMobsCore instance;
     private final long existCheckDelay = 5000L;
-    public NetworkHelper networkHelper;
     private long nextExistCheckTime;
     private Entity infCheckA;
     private Entity infCheckB;
@@ -48,13 +55,19 @@ public class InfernalMobsCore {
         instance = this;
 
         nextExistCheckTime = System.currentTimeMillis();
+        IEventBus eventBus = FMLJavaModLoadingContext.get().getModEventBus();
 
         MinecraftForge.EVENT_BUS.register(this);
         MinecraftForge.EVENT_BUS.register(new EntityEventHandler());
         MinecraftForge.EVENT_BUS.register(new InfernalEntityDropHandler());
         MinecraftForge.EVENT_BUS.register(new SaveEventHandler());
-
-        networkHelper = new NetworkHelper("infernalmobs", MobModsPacket.class, HealthPacket.class, VelocityPacket.class, KnockBackPacket.class, AirPacket.class);
+        MinecraftForge.EVENT_BUS.register(new StunEventHandler());
+        InfernalSounds.register(eventBus);
+        InfernalEffects.register(eventBus);
+        Network.register(MOD_ID, Set.of(RequestMobModifiersInformationPacket.class, RequestHealthInformationPacket.class,
+                MobModifiersInformationPacket.class, HealthInformationPacket.class,
+                VelocityPacket.class, KnockBackPacket.class, AirPacket.class)
+        );
 
         LOGGER = LogManager.getLogger();
     }
@@ -80,10 +93,6 @@ public class InfernalMobsCore {
     public static void setMobWasSpawnedBefore(LivingEntity ent) {
         // if infernal mobs decides not to give an entity mods, we still have to mark it to make sure it never goes through "spawning" again for infernal mobs
         ent.getPersistentData().putString(Tag.NBT_TAG.getId(), instance().getNBTMarkerForNonInfernalEntities());
-    }
-
-    public static void removeEntFromElites(LivingEntity entity) {
-        Cache.getInfernalMonsters(entity.level).remove(entity);
     }
 
     /**
@@ -151,7 +160,7 @@ public class InfernalMobsCore {
     public void setEntityHealthPastMax(LivingEntity entity, float amount) {
         entity.getAttribute(Attributes.MAX_HEALTH).setBaseValue(amount);
         entity.setHealth(amount);
-        instance.sendHealthPacket(entity);
+        PacketSender.sendHealthInformationPacketToSurroundingPlayers(entity);
     }
 
     /**
@@ -160,7 +169,7 @@ public class InfernalMobsCore {
      * @param entity    Target Entity
      * @param savedMods String depicting the MobModifiers, equal to the ingame Display
      */
-    public void addEntityModifiersByString(LivingEntity entity, String savedMods) {
+    public void addModifiersToEntityFromString(LivingEntity entity, String savedMods) {
         if (isRareEntityOnline(entity)) {
             return;
         }
@@ -175,53 +184,11 @@ public class InfernalMobsCore {
         }
     }
 
-    /**
-     * Used by the client side to answer to a server packet carrying the Entity
-     * ID and mod string
-     *
-     * @param world World the client is in, and the Entity aswell
-     * @param entID unique Entity ID
-     * @param mods  MobModifier compliant data String from the server
-     */
-    public void addRemoteEntityModifiers(Level world, int entID, String mods) {
-        Entity ent = world.getEntity(entID);
-        if (ent != null) {
-            addEntityModifiersByString((LivingEntity) ent, mods);
-        }
-    }
-
-    public void sendVelocityPacket(ServerPlayer target, float xVel, float yVel, float zVel) {
-        if (Helper.isEntityValidTarget(target)) {
-            networkHelper.sendPacketToPlayer(new VelocityPacket(xVel, yVel, zVel), target);
-        }
-    }
-
-    public void sendKnockBackPacket(ServerPlayer target, float xVel, float zVel) {
-        if (Helper.isEntityValidTarget(target)) {
-            networkHelper.sendPacketToPlayer(new KnockBackPacket(xVel, zVel), target);
-        }
-    }
-
-    public void sendHealthPacket(LivingEntity mob) {
-        networkHelper.sendPacketToAllAroundPoint(new HealthPacket("", mob.getId(), mob.getHealth(), mob.getMaxHealth()), new PacketDistributor.TargetPoint(mob.getX(), mob.getY(), mob.getZ(), 32d, mob.getCommandSenderWorld().dimension()));
-    }
-
-    public void sendHealthRequestPacket(String playerName, LivingEntity mob) {
-        networkHelper.sendPacketToServer(new HealthPacket(playerName, mob.getId(), 0f, 0f));
-    }
-
-    public void sendAirPacket(ServerPlayer target, int lastAir) {
-        if (Helper.isEntityValidTarget(target)) {
-            networkHelper.sendPacketToPlayer(new AirPacket(lastAir), target);
-        }
-    }
-
     @SubscribeEvent
     public void onTick(TickEvent.LevelTickEvent tick) {
         if (System.currentTimeMillis() > nextExistCheckTime) {
             nextExistCheckTime = System.currentTimeMillis() + existCheckDelay;
-            Map<LivingEntity, InfernalMonster> mobsmap = Cache.getInfernalMonsters(tick.level);
-            mobsmap.keySet().stream().filter(this::filterMob).forEach(InfernalMobsCore::removeEntFromElites);
+            this.removeDeadMonstersFromCache(tick.level);
         }
 
         if (!tick.level.isClientSide) {
@@ -230,8 +197,10 @@ public class InfernalMobsCore {
         }
     }
 
-    private boolean filterMob(LivingEntity mob) {
-        return !mob.isAlive();
+    private void removeDeadMonstersFromCache(Level dimension){
+        Cache.getInfernalMonsters(dimension)
+                .keySet()
+                .removeIf( entity -> !entity.isAlive());
     }
 
     public float getLimitedDamage(float test) {

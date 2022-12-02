@@ -101,6 +101,12 @@ public enum ModifierDefinition {
             List.of("totallyzen", "innerlypeaceful", "Ronin"),
             List.of("theZenMaster", "ofEquilibrium", "ofInnerPeace")
     ),
+    PETRIFY(
+            MM_Petrify.class,
+            "Petrify",
+            List.of("stony", "stunning", "paralyzing"),
+            List.of("theMedusa", "ofParalysis", "theParalyzer")
+    ),
     POISONOUS(
             MM_Poisonous.class,
             "Poisonous",

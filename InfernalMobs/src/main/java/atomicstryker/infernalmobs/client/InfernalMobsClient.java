@@ -2,10 +2,9 @@ package atomicstryker.infernalmobs.client;
 
 import atomicstryker.infernalmobs.InfernalMobsCore;
 import atomicstryker.infernalmobs.common.mod.InfernalMonster;
-import atomicstryker.infernalmobs.common.mod.MobModifier;
 import atomicstryker.infernalmobs.Cache;
 import atomicstryker.infernalmobs.common.mod.specific.MM_Gravity;
-import atomicstryker.infernalmobs.common.network.MobModsPacket;
+import atomicstryker.infernalmobs.common.network.PacketSender;
 import atomicstryker.infernalmobs.config.ConfigStore;
 import net.minecraft.client.Minecraft;
 import net.minecraft.world.entity.Entity;
@@ -36,7 +35,7 @@ public class InfernalMobsClient {
     @SubscribeEvent
     public static void onEntityJoinedWorld(EntityJoinLevelEvent event) {
         if (event.getLevel().isClientSide && mc.player != null && (event.getEntity() instanceof Mob || (event.getEntity() instanceof LivingEntity && event.getEntity() instanceof Enemy))) {
-            InfernalMobsCore.instance().networkHelper.sendPacketToServer(new MobModsPacket(mc.player.getName().getString(), event.getEntity().getId(), (byte) 0));
+            PacketSender.requestMobModifiersInformationFromServer((LivingEntity) event.getEntity());
             InfernalMobsCore.LOGGER.debug("onEntityJoinedWorld {}, ent-id {} querying modifiers from server", event.getEntity(), event.getEntity().getId());
         }
     }
@@ -67,8 +66,14 @@ public class InfernalMobsClient {
         mc.submitAsync(() -> MM_Gravity.knockBack(mc.player, xv, zv));
     }
 
-    public static void onMobModsPacketToClient(String stringData, int entID) {
-        InfernalMobsCore.instance().addRemoteEntityModifiers(mc.level, entID, stringData);
+    public static void addModifiersToEntityFromString(int entityId, String mobModifiers) {
+        if( Objects.isNull(mc.level)){
+            return;
+        }
+        Entity entity = mc.level.getEntity(entityId);
+        if (Objects.nonNull(entity)) {
+            InfernalMobsCore.instance().addModifiersToEntityFromString((LivingEntity) entity, mobModifiers);
+        }
     }
 
     public static void onVelocityPacket(float xv, float yv, float zv) {

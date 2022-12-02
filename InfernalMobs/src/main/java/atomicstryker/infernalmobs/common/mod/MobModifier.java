@@ -44,7 +44,7 @@ public abstract class MobModifier {
      *
      * @return true if death should be aborted
      */
-    public boolean onDeath() {
+    public boolean onDeath(LivingEntity entity) {
         attackTarget = null;
         return true;
     }

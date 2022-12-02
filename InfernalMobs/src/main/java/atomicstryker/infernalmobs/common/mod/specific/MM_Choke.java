@@ -5,6 +5,7 @@ import atomicstryker.infernalmobs.common.mod.InfernalMonster;
 import atomicstryker.infernalmobs.common.mod.MobModifier;
 import atomicstryker.infernalmobs.common.mod.ModifierDefinition;
 import atomicstryker.infernalmobs.common.mod.util.ChokedEntity;
+import atomicstryker.infernalmobs.common.network.PacketSender;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
@@ -66,19 +67,19 @@ public class MM_Choke extends MobModifier {
     }
 
     @Override
-    public boolean onDeath() {
+    public boolean onDeath(LivingEntity entity) {
         this.getChokedEntityList().forEach( chokedEntity -> {
             chokedEntity.setAir(chokedEntity.getTarget().getMaxAirSupply());
         });
         updateAir();
-        return super.onDeath();
+        return super.onDeath(entity);
     }
 
     private void updateAir() {
         this.getChokedEntityList().forEach( chokedEntity -> {
             chokedEntity.getTarget().setAirSupply(chokedEntity.getAir());
             if( chokedEntity.getTarget() instanceof ServerPlayer){
-                InfernalMobsCore.instance().sendAirPacket((ServerPlayer) chokedEntity.getTarget(), chokedEntity.getAir());
+                PacketSender.sendAirPacket((ServerPlayer) chokedEntity.getTarget(), chokedEntity.getAir());
             }
         });
     }

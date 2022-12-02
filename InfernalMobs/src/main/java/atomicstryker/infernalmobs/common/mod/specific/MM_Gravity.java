@@ -4,6 +4,7 @@ import atomicstryker.infernalmobs.InfernalMobsCore;
 import atomicstryker.infernalmobs.common.mod.InfernalMonster;
 import atomicstryker.infernalmobs.common.mod.MobModifier;
 import atomicstryker.infernalmobs.common.mod.ModifierDefinition;
+import atomicstryker.infernalmobs.common.network.PacketSender;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
@@ -75,7 +76,7 @@ public class MM_Gravity extends MobModifier {
             if (mob.level.isClientSide || !(target instanceof ServerPlayer)) {
                 knockBack(target, diffX, diffZ);
             } else {
-                InfernalMobsCore.instance().sendKnockBackPacket((ServerPlayer) target, (float) diffX, (float) diffZ);
+                PacketSender.sendKnockBackPacket((ServerPlayer) target, (float) diffX, (float) diffZ);
             }
         }
     }

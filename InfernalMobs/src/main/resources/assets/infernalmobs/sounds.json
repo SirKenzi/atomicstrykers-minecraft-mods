@@ -1,0 +1,14 @@
+{
+  "modifier_petrify_reminder": {
+    "subtitle": "translation.infernalmobs.sound.modifier_petrify_reminder",
+    "sounds": [
+      "infernalmobs:modifier_petrify_reminder"
+    ]
+  },
+  "modifier_petrify_ability": {
+    "subtitle": "translation.infernalmobs.sound.modifier_petrify_ability",
+    "sounds": [
+      "infernalmobs:modifier_petrify_ability"
+    ]
+  }
+}

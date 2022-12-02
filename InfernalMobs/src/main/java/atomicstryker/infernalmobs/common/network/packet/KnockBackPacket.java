@@ -1,0 +1,43 @@
+package atomicstryker.infernalmobs.common.network.packet;
+
+import atomicstryker.infernalmobs.client.InfernalMobsClient;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraftforge.network.NetworkEvent;
+
+import java.util.function.Supplier;
+
+
+public class KnockBackPacket implements IPacket {
+
+    private float xv, zv;
+
+    public KnockBackPacket() {
+    }
+
+    public KnockBackPacket(float x, float z) {
+        xv = x;
+        zv = z;
+    }
+
+    @Override
+    public void encode(Object msg, FriendlyByteBuf packetBuffer) {
+        KnockBackPacket knockBackPacket = (KnockBackPacket) msg;
+        packetBuffer.writeFloat(knockBackPacket.xv);
+        packetBuffer.writeFloat(knockBackPacket.zv);
+    }
+
+    @Override
+    public <MSG> MSG decode(FriendlyByteBuf packetBuffer) {
+        KnockBackPacket knockBackPacket = new KnockBackPacket();
+        knockBackPacket.xv = packetBuffer.readFloat();
+        knockBackPacket.zv = packetBuffer.readFloat();
+        return (MSG) knockBackPacket;
+    }
+
+    @Override
+    public void handle(Object msg, Supplier<NetworkEvent.Context> contextSupplier) {
+        KnockBackPacket knockBackPacket = (KnockBackPacket) msg;
+        InfernalMobsClient.onKnockBackPacket(knockBackPacket.xv, knockBackPacket.zv);
+        contextSupplier.get().setPacketHandled(true);
+    }
+}

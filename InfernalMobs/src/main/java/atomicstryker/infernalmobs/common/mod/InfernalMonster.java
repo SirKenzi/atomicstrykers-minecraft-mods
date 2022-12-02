@@ -2,6 +2,7 @@ package atomicstryker.infernalmobs.common.mod;
 
 import atomicstryker.infernalmobs.Cache;
 import atomicstryker.infernalmobs.InfernalMobsCore;
+import atomicstryker.infernalmobs.common.network.PacketSender;
 import atomicstryker.infernalmobs.config.ConfigStore;
 import atomicstryker.infernalmobs.util.NameGenerator;
 import atomicstryker.infernalmobs.util.Tag;
@@ -63,8 +64,8 @@ public class InfernalMonster {
                 .collect(Collectors.joining(" "));
     }
 
-    public boolean handleDeath(){
-        return !getModifiers().stream().allMatch(MobModifier::onDeath);
+    public boolean handleDeath(LivingEntity entity){
+        return !getModifiers().stream().allMatch(mobModifier -> mobModifier.onDeath(entity));
     }
 
     public boolean handleTargetChange(LivingEntity newTarget){
@@ -80,7 +81,7 @@ public class InfernalMonster {
             return amount;
         }
         if (source.getEntity().level.isClientSide && source.getEntity() instanceof Player) {
-            InfernalMobsCore.instance().sendHealthRequestPacket(source.getEntity().getName().getString(), target);
+            PacketSender.requestHealthInformationFromServer(target);
         }
         for( MobModifier modifier : getModifiers()){
             amount = modifier.onHurt(target, source, amount);

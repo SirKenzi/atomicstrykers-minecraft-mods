@@ -24,11 +24,24 @@ public class MM_1UP extends MobModifier {
     @Override
     public boolean onUpdate(LivingEntity mob) {
         if (!healed && !mob.level.isClientSide && mob.getHealth() < (this.getInfernalMonster().getMaxHealth(mob) * 0.25)) {
-            mob.setHealth(this.getInfernalMonster().getCurrentHealth());
-            mob.level.playSound(null, mob.blockPosition(), SoundEvents.PLAYER_LEVELUP, SoundSource.HOSTILE, 1.0F + mob.getRandom().nextFloat(), mob.getRandom().nextFloat() * 0.7F + 0.3F);
-            healed = true;
+            this.resurrect(mob);
         }
         return true;
+    }
+
+    @Override
+    public boolean onDeath(LivingEntity entity) {
+        if( this.healed == false ){
+            this.resurrect(entity);
+            return false;
+        }
+        return true;
+    }
+
+    private void resurrect(LivingEntity mob){
+        mob.setHealth(this.getInfernalMonster().getCurrentHealth());
+        mob.level.playSound(null, mob.blockPosition(), SoundEvents.PLAYER_LEVELUP, SoundSource.HOSTILE, 1.0F + mob.getRandom().nextFloat(), mob.getRandom().nextFloat() * 0.7F + 0.3F);
+        healed = true;
     }
 
     @Override
