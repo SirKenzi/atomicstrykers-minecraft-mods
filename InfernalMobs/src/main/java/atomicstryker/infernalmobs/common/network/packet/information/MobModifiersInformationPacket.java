@@ -3,6 +3,8 @@ package atomicstryker.infernalmobs.common.network.packet.information;
 import atomicstryker.infernalmobs.client.InfernalMobsClient;
 import atomicstryker.infernalmobs.common.network.packet.IPacket;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.fml.DistExecutor;
 import net.minecraftforge.network.NetworkEvent;
 
 import java.util.function.Supplier;
@@ -36,7 +38,12 @@ public class MobModifiersInformationPacket implements IPacket {
 
     @Override
     public void handle(Object msg, Supplier<NetworkEvent.Context> contextSupplier) {
-        MobModifiersInformationPacket mobModifiersPacket = (MobModifiersInformationPacket) msg;
-        InfernalMobsClient.addModifiersToEntityFromString(mobModifiersPacket.entityId, mobModifiersPacket.mobModifiers);
+        contextSupplier.get().enqueueWork(() ->
+                DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> {
+                    MobModifiersInformationPacket mobModifiersPacket = (MobModifiersInformationPacket) msg;
+                    InfernalMobsClient.addModifiersToEntityFromString(mobModifiersPacket.entityId, mobModifiersPacket.mobModifiers);
+                })
+        );
+        contextSupplier.get().setPacketHandled(true);
     }
 }

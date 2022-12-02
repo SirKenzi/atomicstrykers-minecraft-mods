@@ -1,4 +1,4 @@
-package atomicstryker.infernalmobs.common.effect;
+package atomicstryker.infernalmobs.common.stun;
 
 import atomicstryker.infernalmobs.common.stun.StunCapability;
 import atomicstryker.infernalmobs.common.stun.StunCapabilityProvider;
@@ -8,7 +8,7 @@ import net.minecraft.world.entity.LivingEntity;
 
 public class PetrifyEffect extends MobEffect {
 
-    protected PetrifyEffect(MobEffectCategory mobEffectCategory, int color) {
+    public PetrifyEffect(MobEffectCategory mobEffectCategory, int color) {
         super(mobEffectCategory, color);
     }
 
@@ -25,7 +25,7 @@ public class PetrifyEffect extends MobEffect {
         livingEntity.teleportTo(x,y,z);
         livingEntity.setDeltaMovement(0,0,0);
         livingEntity.getCapability(StunCapabilityProvider.STUN_CAPABILITY).ifPresent( stunCapability -> {
-            stunCapability.stun(20);
+            stunCapability.stun(20, livingEntity.getPosition(1f), livingEntity.getRotationVector());
         });
 
         super.applyEffectTick(livingEntity, pAmplifier);

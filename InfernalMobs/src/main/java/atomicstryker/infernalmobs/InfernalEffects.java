@@ -1,6 +1,7 @@
-package atomicstryker.infernalmobs.common.effect;
+package atomicstryker.infernalmobs;
 
 import atomicstryker.infernalmobs.InfernalMobsCore;
+import atomicstryker.infernalmobs.common.stun.PetrifyEffect;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectCategory;
 import net.minecraftforge.eventbus.api.IEventBus;

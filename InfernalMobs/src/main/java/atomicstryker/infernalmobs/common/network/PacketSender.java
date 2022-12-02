@@ -1,6 +1,7 @@
 package atomicstryker.infernalmobs.common.network;
 
 import atomicstryker.infernalmobs.common.network.packet.AirPacket;
+import atomicstryker.infernalmobs.common.stun.StunPacket;
 import atomicstryker.infernalmobs.common.network.packet.information.HealthInformationPacket;
 import atomicstryker.infernalmobs.common.network.packet.information.MobModifiersInformationPacket;
 import atomicstryker.infernalmobs.common.network.packet.information.RequestHealthInformationPacket;
@@ -49,6 +50,12 @@ public class PacketSender {
 
     public static void requestMobModifiersInformationFromServer(LivingEntity mob) {
         Network.sendPacketToServer(new RequestMobModifiersInformationPacket(mob.getId()));
+    }
+
+    public static void sendStunPacket(ServerPlayer target, boolean isStunned){
+        if (Helper.isEntityValidTarget(target)) {
+            Network.sendPacketToPlayer(new StunPacket(isStunned), target);
+        }
     }
 
     public static void sendAirPacket(ServerPlayer target, int lastAir) {

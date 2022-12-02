@@ -2,7 +2,6 @@ package atomicstryker.infernalmobs;
 
 import atomicstryker.infernalmobs.command.InfernalCommandFindEntityClass;
 import atomicstryker.infernalmobs.command.InfernalCommandSpawnInfernal;
-import atomicstryker.infernalmobs.common.effect.InfernalEffects;
 import atomicstryker.infernalmobs.common.mod.InfernalMonster;
 import atomicstryker.infernalmobs.common.mod.InfernalMonsterGenerator;
 import atomicstryker.infernalmobs.common.network.packet.*;
@@ -11,12 +10,13 @@ import atomicstryker.infernalmobs.common.network.packet.information.MobModifiers
 import atomicstryker.infernalmobs.common.network.packet.information.RequestHealthInformationPacket;
 import atomicstryker.infernalmobs.common.network.packet.information.RequestMobModifiersInformationPacket;
 import atomicstryker.infernalmobs.common.sound.InfernalSounds;
+import atomicstryker.infernalmobs.common.stun.StunPacket;
 import atomicstryker.infernalmobs.event.EntityEventHandler;
 import atomicstryker.infernalmobs.event.InfernalEntityDropHandler;
 import atomicstryker.infernalmobs.config.*;
 import atomicstryker.infernalmobs.common.network.*;
 import atomicstryker.infernalmobs.event.SaveEventHandler;
-import atomicstryker.infernalmobs.event.StunEventHandler;
+import atomicstryker.infernalmobs.common.stun.StunEventHandler;
 import atomicstryker.infernalmobs.util.Helper;
 import atomicstryker.infernalmobs.util.Tag;
 import net.minecraft.world.entity.Entity;
@@ -66,7 +66,7 @@ public class InfernalMobsCore {
         InfernalEffects.register(eventBus);
         Network.register(MOD_ID, Set.of(RequestMobModifiersInformationPacket.class, RequestHealthInformationPacket.class,
                 MobModifiersInformationPacket.class, HealthInformationPacket.class,
-                VelocityPacket.class, KnockBackPacket.class, AirPacket.class)
+                VelocityPacket.class, KnockBackPacket.class, AirPacket.class, StunPacket.class)
         );
 
         LOGGER = LogManager.getLogger();

@@ -1,6 +1,6 @@
 package atomicstryker.infernalmobs.common.mod.specific;
 
-import atomicstryker.infernalmobs.common.effect.InfernalEffects;
+import atomicstryker.infernalmobs.InfernalEffects;
 import atomicstryker.infernalmobs.common.mod.InfernalMonster;
 import atomicstryker.infernalmobs.common.mod.MobModifier;
 import atomicstryker.infernalmobs.common.mod.ModifierDefinition;
@@ -17,12 +17,12 @@ import java.util.stream.Collectors;
 
 public class MM_Petrify extends MobModifier {
 
-    private final static long cooldown = 12000L;
-    private final static long reminderDelta = 2500L;
-    private long nextAbilityReminder = 0L;
-    private long nextAbilityUse = 0L;
+    private final static long cooldown = 210;
+    private final static long reminderDelta = 45;
+    private long nextAbilityUse = 0;
+    private boolean reminderUsed = false;
 
-    private long abilityRange = 12L;
+    private long abilityRange = 12;
 
     public MM_Petrify(InfernalMonster infernalMonster) {
         super(infernalMonster);
@@ -41,7 +41,7 @@ public class MM_Petrify extends MobModifier {
             if( isReminderReady()){
                 player.getLevel().playSound(null, mob, InfernalSounds.MODIFIER_PETRIFY_REMINDER.get(), SoundSource.HOSTILE, 1f, 1f);
             }
-            else if( isAbilityReady){
+            else if( isAbilityReady ){
                 this.useAbility(player, mob);
             }
         }
@@ -50,26 +50,20 @@ public class MM_Petrify extends MobModifier {
     }
 
     private boolean isReminderReady(){
-        long time = System.currentTimeMillis();
-        if( time > this.getNextAbilityReminder()  ) {
-            this.setNextAbilityReminder(Long.MAX_VALUE);
+        if( nextAbilityUse > cooldown - reminderDelta && !reminderUsed) {
+            reminderUsed = true;
             return true;
         }
         return false;
     }
 
     private boolean isAbilityReady(){
-        long time = System.currentTimeMillis();
-        if( time > this.getNextAbilityUse() ) {
-            this.setNextAbilityUse(time);
+        if( nextAbilityUse++ > cooldown ) {
+            nextAbilityUse = 0;
+            reminderUsed = false;
             return true;
         }
         return false;
-    }
-
-    private void setNextAbilityUse(long time){
-        this.nextAbilityUse = time + cooldown;
-        this.setNextAbilityReminder(time + cooldown - reminderDelta);
     }
 
     private void useAbility(Player player, LivingEntity source){
@@ -109,19 +103,9 @@ public class MM_Petrify extends MobModifier {
         return (minX < sourceX && sourceX < maxX) && (minZ < sourceZ && sourceZ < maxZ);
     }
 
-    public void setNextAbilityReminder(long time) {
-        this.nextAbilityReminder = time;
-    }
-
-    public long getNextAbilityReminder() {
-        return nextAbilityReminder;
-    }
-
-    public long getNextAbilityUse() {
-        return nextAbilityUse;
-    }
-
     public long getAbilityRange(){ return this.abilityRange; }
 
-
+    public void setAbilityRange(long abilityRange) {
+        this.abilityRange = abilityRange;
+    }
 }

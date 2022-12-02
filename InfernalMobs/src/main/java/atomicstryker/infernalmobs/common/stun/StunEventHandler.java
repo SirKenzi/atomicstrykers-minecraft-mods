@@ -1,24 +1,22 @@
-package atomicstryker.infernalmobs.event;
+package atomicstryker.infernalmobs.common.stun;
 
 import atomicstryker.infernalmobs.InfernalMobsCore;
+import atomicstryker.infernalmobs.client.status.ClientStatus;
+import atomicstryker.infernalmobs.common.network.PacketSender;
 import atomicstryker.infernalmobs.common.stun.StunCapabilityProvider;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.screens.controls.KeyBindsList;
-import net.minecraft.client.player.LocalPlayer;
-import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraftforge.client.event.InputEvent;
+import net.minecraftforge.client.event.ViewportEvent;
 import net.minecraftforge.event.AttachCapabilitiesEvent;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.LogicalSide;
 import net.minecraftforge.fml.common.Mod;
-
-import java.util.Objects;
-
 @Mod.EventBusSubscriber(modid = InfernalMobsCore.MOD_ID)
 public class StunEventHandler {
 
@@ -46,29 +44,41 @@ public class StunEventHandler {
 
     @SubscribeEvent
     public static void onPlayerTick(TickEvent.PlayerTickEvent event){
-        //todo: change to  remote
-        if( event.side == LogicalSide.CLIENT && event.phase == TickEvent.Phase.START){
+        if( event.side == LogicalSide.SERVER ){
             event.player.getCapability(StunCapabilityProvider.STUN_CAPABILITY).ifPresent( stunCapability -> {
-                if( stunCapability.isStunned() && stunCapability.getTicks() >= stunCapability.getDuration()){
-                    event.player.sendSystemMessage(Component.literal("PLAYER IS STUNNED"));
-                } else {
+                ServerPlayer player = (ServerPlayer) event.player;
+                 if( stunCapability.isStunned() && stunCapability.getTicks() >= stunCapability.getDuration()){
                     stunCapability.removeStun();
-                }
+                    PacketSender.sendStunPacket(player, false);
+                } else if ( stunCapability.isStunned()){
+                     stunCapability.tick();
+                     player.teleportTo(stunCapability.getLockedPosition().x, stunCapability.getLockedPosition().y, stunCapability.getLockedPosition().z);
+                     player.setXRot(stunCapability.getLockedRotation().x);
+                     player.setYRot(stunCapability.getLockedRotation().y);
+                     player.setDeltaMovement(0,0,0);
+                     PacketSender.sendStunPacket(player, true);
+                 }
             });
+        }
+    }
+    @SubscribeEvent
+    public static void onKeyPress(InputEvent.Key event){
+        if(ClientStatus.isStunned()){
+            event.setCanceled(true);
         }
     }
 
     @SubscribeEvent
     public static void onMouseEvent(InputEvent.MouseButton event){
-        LocalPlayer player = Minecraft.getInstance().player;
-        if(Objects.nonNull(player)) {
-            player.getCapability(StunCapabilityProvider.STUN_CAPABILITY).ifPresent(stunCapability -> {
-                if (stunCapability.isStunned()) {
-                    player.sendSystemMessage(Component.literal("PLAYER MOUSE IS STUNNED"));
-                    event.setCanceled(true);
-                }
-            });
+        if(ClientStatus.isStunned()){
+            event.setCanceled(true);
         }
-
     }
+    @SubscribeEvent
+    public static void onCameraMove(ViewportEvent.ComputeCameraAngles event){
+        if(ClientStatus.isStunned()){
+            event.setCanceled(true);
+        }
+    }
+
 }

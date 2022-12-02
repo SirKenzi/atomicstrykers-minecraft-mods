@@ -50,9 +50,6 @@ public class EntityEventHandler {
 
     @SubscribeEvent
     public void onEntityLivingAttacked(LivingAttackEvent event) {
-        if( event.getSource().getEntity() instanceof Player){
-            System.out.println("PLAYER ATTACKED");
-        }
         /* fires both client and server before hurt, but we dont need this */
     }
 
